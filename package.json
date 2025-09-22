@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && next export",
+    "build": "next build",
     "start": "next start",
     "lint": "echo \"(lint opcional)\"",
     "postexport": "node scripts/make-404.js || echo \"skip 404 copy\""
