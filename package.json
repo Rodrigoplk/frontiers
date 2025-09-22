@@ -1,0 +1,17 @@
+{
+  "name": "nextjs-welcome",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build && next export",
+    "start": "next start",
+    "lint": "echo \"(lint opcional)\"",
+    "postexport": "node scripts/make-404.js || echo \"skip 404 copy\""
+  },
+  "dependencies": {
+    "next": "14.2.5",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  }
+}
