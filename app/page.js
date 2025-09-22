@@ -32,10 +32,6 @@ export default function HomePage() {
             🐙 Guía de GitHub Pages
           </a>
         </div>
-
-        <p style={{ marginTop: '2rem', fontSize: '.95rem', opacity: .7 }}>
-          Edita <code>app/page.js</code> y haz <code>git push</code> para ver cambios.
-        </p>
       </section>
     </main>
   );
