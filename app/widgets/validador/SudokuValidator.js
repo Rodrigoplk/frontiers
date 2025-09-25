@@ -30,35 +30,83 @@ const isPlacementSafe = (board, row, col, value) => {
   return true;
 };
 
-const solveSudoku = (board) => {
+const findBestCell = (board) => {
+  let bestRow = -1;
+  let bestCol = -1;
+  let bestCandidates = null;
+
   for (let row = 0; row < GRID_SIZE; row += 1) {
     for (let col = 0; col < GRID_SIZE; col += 1) {
-      if (board[row][col] === 0) {
-        for (let value = 1; value <= GRID_SIZE; value += 1) {
-          if (isPlacementSafe(board, row, col, value)) {
-            board[row][col] = value;
+      if (board[row][col] !== 0) {
+        continue;
+      }
 
-            if (solveSudoku(board)) {
-              return true;
-            }
+      const candidates = [];
 
-            board[row][col] = 0;
-          }
+      for (let value = 1; value <= GRID_SIZE; value += 1) {
+        if (isPlacementSafe(board, row, col, value)) {
+          candidates.push(value);
         }
+      }
 
-        board[row][col] = 0;
-        return false;
+      if (candidates.length === 0) {
+        return { row, col, candidates };
+      }
+
+      if (bestCandidates === null || candidates.length < bestCandidates.length) {
+        bestRow = row;
+        bestCol = col;
+        bestCandidates = candidates;
+
+        if (candidates.length === 1) {
+          return { row: bestRow, col: bestCol, candidates: bestCandidates };
+        }
       }
     }
   }
 
-  return true;
+  if (bestCandidates === null) {
+    return null;
+  }
+
+  return { row: bestRow, col: bestCol, candidates: bestCandidates };
+};
+
+const countSolutions = (board, limit = 2) => {
+  const bestCell = findBestCell(board);
+
+  if (bestCell === null) {
+    return 1;
+  }
+
+  const { row, col, candidates } = bestCell;
+
+  if (candidates.length === 0) {
+    return 0;
+  }
+
+  let totalSolutions = 0;
+
+  for (let index = 0; index < candidates.length; index += 1) {
+    const candidate = candidates[index];
+    board[row][col] = candidate;
+
+    totalSolutions += countSolutions(board, limit - totalSolutions);
+
+    board[row][col] = 0;
+
+    if (totalSolutions >= limit) {
+      return totalSolutions;
+    }
+  }
+
+  return totalSolutions;
 };
 
 export default function SudokuValidator() {
   const [grid, setGrid] = useState(createEmptyGrid);
   const [statusMessage, setStatusMessage] = useState(
-    'Propón un sudoku rellenando las casillas que quieras y comprueba si es válido.'
+    'Propón un sudoku rellenando las casillas que quieras y comprueba si es válido y único.'
   );
   const [invalidCells, setInvalidCells] = useState([]);
 
@@ -143,14 +191,17 @@ export default function SudokuValidator() {
 
     const boardForSolving = numericBoard.map((row) => row.slice());
 
-    const canBeSolved = solveSudoku(boardForSolving);
+    const solutionCount = countSolutions(boardForSolving, 2);
 
-    if (canBeSolved) {
+    if (solutionCount === 1) {
       setInvalidCells([]);
-      setStatusMessage('✅ El sudoku es válido y tiene al menos una solución.');
-    } else {
+      setStatusMessage('✅ El sudoku es válido y tiene una única solución.');
+    } else if (solutionCount === 0) {
       setInvalidCells([]);
       setStatusMessage('⚠️ El sudoku no se puede resolver sin romper las reglas.');
+    } else {
+      setInvalidCells([]);
+      setStatusMessage('ℹ️ El sudoku es resoluble, pero tiene múltiples soluciones.');
     }
   };
 
@@ -162,7 +213,7 @@ export default function SudokuValidator() {
           <h1>Validador de sudokus</h1>
           <p>
             Comprueba si tu propuesta respeta las reglas clásicas: sin duplicados en filas,
-            columnas ni regiones, y con al menos una solución posible.
+            columnas ni regiones, y con exactamente una solución posible.
           </p>
         </header>
 
