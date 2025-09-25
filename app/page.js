@@ -1,38 +1,55 @@
 export default function HomePage() {
   return (
-    <main style={{
-      minHeight: '100dvh',
-      display: 'grid',
-      placeItems: 'center',
-      padding: '2rem',
-      fontFamily: 'system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, "Helvetica Neue", Arial, "Apple Color Emoji","Segoe UI Emoji"'
-    }}>
-      <section style={{
-        maxWidth: 760,
-        width: '100%',
-        borderRadius: 16,
-        padding: '2.5rem',
-        boxShadow: '0 10px 35px rgba(0,0,0,.08)',
-        textAlign: 'center'
-      }}>
-        <h1 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', margin: 0 }}>
-          ¡Bienvenido a tu página Next.js!
-        </h1>
-        <p style={{ fontSize: '1.1rem', lineHeight: 1.6, marginTop: '1rem', opacity: .85 }}>
-          Esta landing está lista para desplegarse en <strong>GitHub Pages</strong> usando <em>GitHub Actions</em>, sin servidor y sin coste.
-        </p>
+    <main className="welcome-page">
+      <span className="zipper-strip top" aria-hidden="true" />
+      <span className="zipper-strip bottom" aria-hidden="true" />
 
-        <div style={{ display: 'grid', gap: '.75rem', marginTop: '2rem' }}>
-          <a href="https://nextjs.org/docs" target="_blank" rel="noreferrer"
-             style={{ textDecoration: 'none' }}>
-            📘 Documentación de Next.js
-          </a>
-          <a href="https://docs.github.com/en/pages" target="_blank" rel="noreferrer"
-             style={{ textDecoration: 'none' }}>
-            🐙 Guía de GitHub Pages
-          </a>
-        </div>
-      </section>
+      <div className="zipper-frame">
+        <header className="hero">
+          <p className="hero__subtitle">Laboratorio personal</p>
+          <h1 className="hero__title">Rodrigoplk repo</h1>
+          <p className="hero__lead">
+            Un espacio vivo para experimentar con widgets, utilidades instantáneas y minijuegos que van apareciendo cuando la inspiración golpea.
+          </p>
+        </header>
+
+        <section className="vision">
+          <div className="vision__panel">
+            <h2>Ideas en iteración</h2>
+            <p>
+              El objetivo es construir un set de herramientas rápidas para el día a día: desde cronómetros personalizados hasta tableros lúdicos.
+            </p>
+          </div>
+          <div className="vision__panel">
+            <h2>Estética modular</h2>
+            <p>
+              Cada módulo tendrá su propia personalidad, manteniendo el hilo visual oscuro con destellos naranjas y bordes suaves.
+            </p>
+          </div>
+        </section>
+
+        <section className="widget-highlight">
+          <article className="widget-card">
+            <span className="widget-card__tag">Widget destacado</span>
+            <h3 className="widget-card__title">Adivina el número</h3>
+            <p className="widget-card__description">
+              Un pequeño desafío de intuición para calentar la mente: intenta adivinar el número secreto entre 1 y 50 en los menores intentos posibles.
+            </p>
+            <a className="widget-card__action" href="/widgets/adivina">
+              Entrar al minijuego
+            </a>
+          </article>
+        </section>
+
+        <footer className="roadmap">
+          <h4>En la hoja de ruta:</h4>
+          <ul>
+            <li>Widgets de productividad en vivo.</li>
+            <li>Mini retos que se resuelven en 2 minutos.</li>
+            <li>Integraciones con APIs curiosas.</li>
+          </ul>
+        </footer>
+      </div>
     </main>
   );
 }
