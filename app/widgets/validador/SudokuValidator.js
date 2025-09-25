@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 
 const GRID_SIZE = 9;
+const PLAY_SUDOKU_BASE_URL = 'https://rodrigoplk.github.io/frontiers/widgets/sudoku';
 
 const createEmptyGrid = () =>
   Array.from({ length: GRID_SIZE }, () => Array.from({ length: GRID_SIZE }, () => ''));
@@ -103,12 +104,18 @@ const countSolutions = (board, limit = 2) => {
   return totalSolutions;
 };
 
+const serializeBoardForPlay = (board) =>
+  board
+    .map((row) => row.map((value) => (value === 0 ? '0' : String(value))).join(''))
+    .join('');
+
 export default function SudokuValidator() {
   const [grid, setGrid] = useState(createEmptyGrid);
   const [statusMessage, setStatusMessage] = useState(
     'Propón un sudoku rellenando las casillas que quieras y comprueba si es válido y único.'
   );
   const [invalidCells, setInvalidCells] = useState([]);
+  const [playUrl, setPlayUrl] = useState(null);
 
   const invalidCellSet = useMemo(() => new Set(invalidCells), [invalidCells]);
 
@@ -120,12 +127,14 @@ export default function SudokuValidator() {
       next[rowIndex][colIndex] = sanitized;
       return next;
     });
+    setPlayUrl(null);
   };
 
   const clearGrid = () => {
     setGrid(createEmptyGrid());
     setInvalidCells([]);
     setStatusMessage('Tablero reiniciado. ¡Listo para un nuevo intento!');
+    setPlayUrl(null);
   };
 
   const validateSudoku = () => {
@@ -186,6 +195,7 @@ export default function SudokuValidator() {
       } else {
         setStatusMessage('Hay conflictos en el tablero. Revisa las casillas destacadas.');
       }
+      setPlayUrl(null);
       return;
     }
 
@@ -196,12 +206,17 @@ export default function SudokuValidator() {
     if (solutionCount === 1) {
       setInvalidCells([]);
       setStatusMessage('✅ El sudoku es válido y tiene una única solución.');
+      const url = new URL(PLAY_SUDOKU_BASE_URL);
+      url.searchParams.set('board', serializeBoardForPlay(numericBoard));
+      setPlayUrl(url.toString());
     } else if (solutionCount === 0) {
       setInvalidCells([]);
       setStatusMessage('⚠️ El sudoku no se puede resolver sin romper las reglas.');
+      setPlayUrl(null);
     } else {
       setInvalidCells([]);
       setStatusMessage('ℹ️ El sudoku es resoluble, pero tiene múltiples soluciones.');
+      setPlayUrl(null);
     }
   };
 
@@ -262,6 +277,17 @@ export default function SudokuValidator() {
             Limpiar tablero
           </button>
         </div>
+
+        {playUrl && (
+          <a
+            className="sudoku-play-link"
+            href={playUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Jugar este sudoku
+          </a>
+        )}
 
         <p className="sudoku-status" role="status" aria-live="polite">
           {statusMessage}
