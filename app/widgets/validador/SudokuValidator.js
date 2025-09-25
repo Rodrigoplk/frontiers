@@ -213,13 +213,15 @@ export default function SudokuValidator() {
     setInvalidCells([]);
     if (solutionCount === 1) {
       setStatusMessage('✅ El sudoku es válido y tiene una única solución.');
-    } else {
-      setStatusMessage('ℹ️ El sudoku es resoluble, pero tiene múltiples soluciones.');
+
+      const url = new URL(PLAY_SUDOKU_BASE_URL);
+      url.searchParams.set('board', serializeBoardForPlay(numericBoard));
+      setPlayUrl(url.toString());
+      return;
     }
 
-    const url = new URL(PLAY_SUDOKU_BASE_URL);
-    url.searchParams.set('board', serializeBoardForPlay(numericBoard));
-    setPlayUrl(url.toString());
+    setStatusMessage('ℹ️ El sudoku es resoluble, pero tiene múltiples soluciones.');
+    setPlayUrl(null);
   };
 
   return (
