@@ -203,21 +203,23 @@ export default function SudokuValidator() {
 
     const solutionCount = countSolutions(boardForSolving, 2);
 
-    if (solutionCount === 1) {
-      setInvalidCells([]);
-      setStatusMessage('✅ El sudoku es válido y tiene una única solución.');
-      const url = new URL(PLAY_SUDOKU_BASE_URL);
-      url.searchParams.set('board', serializeBoardForPlay(numericBoard));
-      setPlayUrl(url.toString());
-    } else if (solutionCount === 0) {
+    if (solutionCount === 0) {
       setInvalidCells([]);
       setStatusMessage('⚠️ El sudoku no se puede resolver sin romper las reglas.');
       setPlayUrl(null);
-    } else {
-      setInvalidCells([]);
-      setStatusMessage('ℹ️ El sudoku es resoluble, pero tiene múltiples soluciones.');
-      setPlayUrl(null);
+      return;
     }
+
+    setInvalidCells([]);
+    if (solutionCount === 1) {
+      setStatusMessage('✅ El sudoku es válido y tiene una única solución.');
+    } else {
+      setStatusMessage('ℹ️ El sudoku es resoluble, pero tiene múltiples soluciones.');
+    }
+
+    const url = new URL(PLAY_SUDOKU_BASE_URL);
+    url.searchParams.set('board', serializeBoardForPlay(numericBoard));
+    setPlayUrl(url.toString());
   };
 
   return (
