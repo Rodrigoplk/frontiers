@@ -448,6 +448,11 @@ a:hover {
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
+.sudoku-cell--fixed {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 200, 150, 0.4);
+}
+
 .sudoku-cell input {
   width: 100%;
   aspect-ratio: 1 / 1;
@@ -462,6 +467,12 @@ a:hover {
 .sudoku-cell input:focus {
   outline: none;
   background: rgba(255, 255, 255, 0.08);
+}
+
+.sudoku-cell input:disabled {
+  color: #fff0dc;
+  cursor: default;
+  background: transparent;
 }
 
 .sudoku-cell--divider-right {
