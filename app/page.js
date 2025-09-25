@@ -19,6 +19,17 @@ export default function HomePage() {
               Entrar al minijuego
             </Link>
           </article>
+
+          <article className="widget-card">
+            <span className="widget-card__tag">Sudoku toolkit</span>
+            <h3 className="widget-card__title">Comprueba tus retículas</h3>
+            <p className="widget-card__description">
+              Construye un tablero desde cero y verifica si respeta las reglas y se puede resolver.
+            </p>
+            <Link className="widget-card__action" href="/widgets/validador">
+              Validar un sudoku
+            </Link>
+          </article>
         </section>
       </div>
     </main>
