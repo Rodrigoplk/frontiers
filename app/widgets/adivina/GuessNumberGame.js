@@ -70,6 +70,8 @@ export default function GuessNumberGame() {
     setGuess('');
   };
 
+  const showSergioEasterEgg = guess.trim() === '23';
+
   return (
     <main className="mini-game">
       <div className="game-card">
@@ -98,6 +100,17 @@ export default function GuessNumberGame() {
           >
             {hintText}
           </span>
+          {showSergioEasterEgg ? (
+            <p
+              style={{
+                marginTop: '0.35rem',
+                fontSize: '0.8rem',
+                color: 'rgba(200, 200, 200, 0.6)',
+              }}
+            >
+              23.. Sergio? 🤔
+            </p>
+          ) : null}
           <button type="submit">Probar suerte</button>
         </form>
 
@@ -131,7 +144,7 @@ export default function GuessNumberGame() {
           </button>
         </div>
 
-        <a className="back-link" href="/">
+        <a className="back-link" href="/frontiers">
           Volver a la base
         </a>
       </div>

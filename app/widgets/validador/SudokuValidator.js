@@ -267,7 +267,7 @@ export default function SudokuValidator() {
           {statusMessage}
         </p>
 
-        <a className="back-link" href="/">
+        <a className="back-link" href="/frontiers">
           Volver a la base
         </a>
       </div>
