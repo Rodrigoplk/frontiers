@@ -30,6 +30,17 @@ export default function HomePage() {
               Validar un sudoku
             </Link>
           </article>
+
+          <article className="widget-card">
+            <span className="widget-card__tag">Clásico tablero de damas</span>
+            <h3 className="widget-card__title">Reta a un rival en el tablero</h3>
+            <p className="widget-card__description">
+              Vive una partida completa con capturas encadenadas, coronación y registro de fichas capturadas.
+            </p>
+            <Link className="widget-card__action" href="/widgets/damas">
+              Jugar una partida
+            </Link>
+          </article>
         </section>
       </div>
     </main>

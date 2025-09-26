@@ -1,0 +1,223 @@
+.gameShell {
+  display: grid;
+  gap: 1.75rem;
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+  border-radius: 28px;
+  background: linear-gradient(145deg, rgba(18, 18, 18, 0.95), rgba(6, 6, 6, 0.92));
+  border: 1px solid rgba(255, 145, 77, 0.35);
+  box-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.55),
+    inset 0 0 30px rgba(255, 145, 77, 0.12);
+}
+
+.gameHeader {
+  text-align: center;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.gameHeader h1 {
+  margin: 0;
+  font-size: clamp(1.8rem, 3.5vw, 2.4rem);
+  color: #ffe0c5;
+}
+
+.gameHeader p {
+  margin: 0;
+  color: rgba(255, 228, 206, 0.82);
+  font-size: clamp(1rem, 2vw, 1.1rem);
+}
+
+.resetButton {
+  justify-self: center;
+  padding: 0.65rem 1.75rem;
+  background: linear-gradient(120deg, rgba(255, 129, 66, 0.85), rgba(255, 95, 40, 0.95));
+  border: none;
+  border-radius: 999px;
+  color: #180b04;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 12px 24px rgba(255, 120, 40, 0.25);
+}
+
+.resetButton:hover {
+  transform: translateY(-1px) scale(1.01);
+  box-shadow: 0 16px 28px rgba(255, 140, 60, 0.32);
+}
+
+.boardWrapper {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) minmax(320px, 480px) minmax(120px, 1fr);
+  gap: clamp(1rem, 2.5vw, 1.5rem);
+  align-items: center;
+}
+
+.capturedColumn {
+  display: grid;
+  gap: 0.75rem;
+  justify-items: center;
+}
+
+.capturedColumn h2 {
+  margin: 0;
+  font-size: clamp(1.1rem, 2vw, 1.3rem);
+  color: rgba(255, 205, 170, 0.85);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.capturedTray {
+  min-height: 200px;
+  min-width: 100px;
+  padding: 0.75rem;
+  border-radius: 18px;
+  border: 1px dashed rgba(255, 145, 77, 0.35);
+  background: rgba(20, 20, 20, 0.45);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  justify-content: center;
+  align-items: center;
+}
+
+.emptyTray {
+  color: rgba(255, 228, 206, 0.42);
+  font-size: 0.9rem;
+}
+
+.board {
+  display: grid;
+  gap: 0;
+  border-radius: 22px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 145, 77, 0.4);
+  box-shadow:
+    inset 0 0 40px rgba(0, 0, 0, 0.45),
+    0 20px 40px rgba(0, 0, 0, 0.55);
+}
+
+.boardRow {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+}
+
+.boardCell {
+  position: relative;
+  width: clamp(48px, 8vw, 70px);
+  height: clamp(48px, 8vw, 70px);
+  padding: 0;
+  border: none;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.boardCell:disabled {
+  cursor: default;
+}
+
+.lightSquare {
+  background: linear-gradient(135deg, rgba(65, 40, 25, 0.58), rgba(45, 28, 18, 0.66));
+}
+
+.darkSquare {
+  background: linear-gradient(135deg, rgba(28, 20, 15, 0.92), rgba(14, 10, 7, 0.95));
+}
+
+.selectedCell {
+  box-shadow: inset 0 0 0 3px rgba(255, 153, 85, 0.85);
+}
+
+.targetCell {
+  outline: 3px solid rgba(255, 180, 90, 0.75);
+  outline-offset: -4px;
+}
+
+.forcedCell::after {
+  content: '';
+  position: absolute;
+  inset: 12%;
+  border-radius: 50%;
+  border: 2px dashed rgba(255, 182, 102, 0.6);
+  pointer-events: none;
+  animation: pulse 1.2s infinite ease-in-out;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.2;
+    transform: scale(1.08);
+  }
+  100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+}
+
+.piece {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: clamp(36px, 6vw, 52px);
+  height: clamp(36px, 6vw, 52px);
+  border-radius: 50%;
+  box-shadow:
+    0 8px 18px rgba(0, 0, 0, 0.45),
+    inset 0 0 0 3px rgba(0, 0, 0, 0.5);
+  font-size: clamp(1.1rem, 2vw, 1.4rem);
+  color: #ffd8a8;
+}
+
+.onyxPiece {
+  background: radial-gradient(circle at 30% 30%, #4d4f58, #1c1e27 65%, #10111a 100%);
+}
+
+.emberPiece {
+  background: radial-gradient(circle at 30% 30%, #ff9b4d, #ff6a33 62%, #b43a1b 100%);
+}
+
+.kingPiece {
+  box-shadow:
+    0 10px 20px rgba(0, 0, 0, 0.5),
+    inset 0 0 0 3px rgba(255, 215, 160, 0.5);
+}
+
+.crown {
+  text-shadow: 0 0 12px rgba(255, 210, 150, 0.5);
+}
+
+.winnerBanner {
+  text-align: center;
+  font-size: clamp(1.15rem, 2.5vw, 1.4rem);
+  color: #ffe6c9;
+  background: linear-gradient(120deg, rgba(255, 120, 40, 0.22), rgba(255, 80, 30, 0.18));
+  border-radius: 18px;
+  padding: 0.85rem 1.2rem;
+  border: 1px solid rgba(255, 145, 77, 0.4);
+  box-shadow: 0 12px 22px rgba(0, 0, 0, 0.45);
+}
+
+@media (max-width: 960px) {
+  .boardWrapper {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+
+  .capturedColumn {
+    width: 100%;
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+
+  .capturedTray {
+    width: min(100%, 320px);
+  }
+}
