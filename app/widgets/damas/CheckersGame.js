@@ -445,6 +445,10 @@ export default function CheckersGame() {
           {winner === 'draw' ? 'Tablas: no quedan movimientos legales.' : `Victoria para ${PLAYER_INFO[winner].label}!`}
         </div>
       ) : null}
+
+      <a className="back-link" href="/frontiers">
+        Volver a la base
+      </a>
     </div>
   );
 }

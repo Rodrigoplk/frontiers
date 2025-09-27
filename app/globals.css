@@ -171,10 +171,16 @@ a:hover {
 }
 
 .widget-highlight {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: clamp(1.5rem, 4vw, 2.5rem);
+  align-items: stretch;
+}
+
+@media (min-width: 900px) {
+  .widget-highlight {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 .widget-card {
@@ -189,6 +195,13 @@ a:hover {
     0 25px 55px rgba(0, 0, 0, 0.55),
     inset 0 0 40px rgba(255, 120, 40, 0.14);
   text-align: center;
+  aspect-ratio: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 1.25rem;
+  overflow: hidden;
 }
 
 .widget-card__tag {
@@ -207,8 +220,8 @@ a:hover {
 }
 
 .widget-card__title {
-  margin: 0.75rem 0 0.5rem;
-  font-size: clamp(1.6rem, 3vw, 2rem);
+  margin: 0.5rem 0 0.25rem;
+  font-size: clamp(1.4rem, 2.5vw, 1.75rem);
   color: #ffe3ca;
 }
 
@@ -233,6 +246,7 @@ a:hover {
   text-decoration: none;
   box-shadow: 0 15px 35px rgba(255, 120, 40, 0.45);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  margin-top: auto;
 }
 
 .widget-card__action:hover {
