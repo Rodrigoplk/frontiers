@@ -41,6 +41,17 @@ export default function HomePage() {
               Jugar una partida
             </Link>
           </article>
+
+          <article className="widget-card">
+            <span className="widget-card__tag">Imagine Craft</span>
+            <h3 className="widget-card__title">Fusiona ideas y elementos</h3>
+            <p className="widget-card__description">
+              Diseña tus propios cuadros, arrástralos y descubre combinaciones dinámicas inspiradas en Infinite Craft.
+            </p>
+            <Link className="widget-card__action" href="/widgets/imagine-craft">
+              Abrir el taller creativo
+            </Link>
+          </article>
         </section>
       </div>
     </main>
