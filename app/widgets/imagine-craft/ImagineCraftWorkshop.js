@@ -611,6 +611,9 @@ function ImagineCraftWorkshop() {
   const [statusMessage, setStatusMessage] = useState('Listo para crear nuevas combinaciones.');
   const [draggingId, setDraggingId] = useState(null);
   const [selectedFusion, setSelectedFusion] = useState(null);
+  const [isLogOpen, setIsLogOpen] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
 
   const paletteById = useMemo(() => {
     const map = new Map();
@@ -627,6 +630,39 @@ function ImagineCraftWorkshop() {
     });
     return map;
   }, [boardElements]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+    const updateLayout = () => {
+      setIsDesktop(window.innerWidth >= 960);
+    };
+    updateLayout();
+    window.addEventListener('resize', updateLayout);
+    return () => {
+      window.removeEventListener('resize', updateLayout);
+    };
+  }, []);
+
+  useEffect(() => {
+    setIsLogOpen(isDesktop);
+  }, [isDesktop]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+    const query = window.matchMedia('(pointer: coarse)');
+    const update = () => setIsTouchDevice(query.matches);
+    update();
+    if (typeof query.addEventListener === 'function') {
+      query.addEventListener('change', update);
+      return () => {
+        query.removeEventListener('change', update);
+      };
+    }
+    query.addListener(update);
+    return () => {
+      query.removeListener(update);
+    };
+  }, []);
 
   useEffect(() => {
     if (!selectedFusion) return;
@@ -736,6 +772,19 @@ function ImagineCraftWorkshop() {
     const newElement = createBoardElement(element, coords, metadata);
     setBoardElements((prev) => [...prev, newElement]);
     return newElement;
+  };
+
+  const placeElementAtCenter = (element) => {
+    const workspace = workspaceRef.current;
+    if (!workspace) return;
+    const rect = workspace.getBoundingClientRect();
+    const coords = {
+      x: rect.width / 2,
+      y: rect.height / 2,
+    };
+    placeOnWorkspace(element, coords);
+    setStatusMessage(`Has colocado ${element.name} en el espacio creativo.`);
+    setSelectedFusion(null);
   };
 
   const handleWorkspaceDrop = (event) => {
@@ -891,6 +940,13 @@ function ImagineCraftWorkshop() {
     }
   };
 
+  const handlePaletteQuickPlace = (event, element) => {
+    if (!isTouchDevice) return;
+    if (draggingId) return;
+    event.preventDefault();
+    placeElementAtCenter(element);
+  };
+
   return (
     <section className={styles.page}>
       <header className={styles.header}>
@@ -940,6 +996,18 @@ function ImagineCraftWorkshop() {
         </div>
       </form>
 
+      {!isDesktop && (
+        <button
+          type="button"
+          className={`${styles.logToggle} ${isLogOpen ? styles.logToggleActive : ''}`}
+          onClick={() => setIsLogOpen((prev) => !prev)}
+          aria-expanded={isLogOpen}
+          aria-controls="workshop-log"
+        >
+          Bitácora de mezclas
+        </button>
+      )}
+
       <div className={styles.mainArea}>
         <div className={styles.workspaceWrapper}>
           <div
@@ -977,7 +1045,17 @@ function ImagineCraftWorkshop() {
             ))}
           </div>
         </div>
-        <aside className={styles.sidePanel}>
+        <aside
+          id="workshop-log"
+          aria-hidden={!isDesktop && !isLogOpen}
+          className={`${styles.sidePanel} ${
+            isDesktop
+              ? ''
+              : isLogOpen
+              ? styles.sidePanelOverlayVisible
+              : styles.sidePanelOverlayHidden
+          } ${!isDesktop ? styles.sidePanelOverlay : ''}`}
+        >
           <h2 className={styles.panelTitle}>Bitácora de mezclas</h2>
           {selectedFusion && (
             <div className={styles.fusionPanel}>
@@ -1029,6 +1107,7 @@ function ImagineCraftWorkshop() {
               draggable
               onDragStart={(event) => handlePaletteDragStart(event, element)}
               onDragEnd={handleDragEnd}
+              onClick={(event) => handlePaletteQuickPlace(event, element)}
             >
               <span className={styles.paletteName}>{element.name}</span>
               <span className={styles.paletteType}>{element.type}</span>
