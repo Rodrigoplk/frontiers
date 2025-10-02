@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import styles from './ImagineCraftWorkshop.module.css';
 
@@ -31,6 +32,8 @@ const INITIAL_PALETTE = [
   { name: 'Melodía', type: 'Arte' },
 ];
 
+const BASE_NAMES = new Set(INITIAL_PALETTE.map((item) => item.name));
+
 function comboKey(a, b) {
   return [a, b]
     .map((value) => value.toLowerCase())
@@ -38,128 +41,434 @@ function comboKey(a, b) {
     .join('::');
 }
 
-const EXACT_COMBINATIONS = new Map([
-  [
-    comboKey('Agua', 'Fuego'),
-    {
+const EXACT_COMBINATION_DATA = [
+  {
+    sources: ['Agua', 'Fuego'],
+    result: {
       name: 'Vapor',
       type: 'Fenómeno',
       lore: 'La niebla cálida de una reacción elemental.',
     },
-  ],
-  [
-    comboKey('Agua', 'Aire'),
-    {
+  },
+  {
+    sources: ['Agua', 'Aire'],
+    result: {
       name: 'Niebla',
       type: 'Fenómeno',
       lore: 'Una nube baja se desliza sobre el taller.',
     },
-  ],
-  [
-    comboKey('Agua', 'Tierra'),
-    {
+  },
+  {
+    sources: ['Agua', 'Tierra'],
+    result: {
       name: 'Barro',
       type: 'Materia',
       lore: 'Pasta maleable que guarda potencial artístico.',
     },
-  ],
-  [
-    comboKey('Fuego', 'Aire'),
-    {
+  },
+  {
+    sources: ['Fuego', 'Aire'],
+    result: {
       name: 'Chispa',
       type: 'Energía',
       lore: 'Un destello fugaz listo para alimentar ideas.',
     },
-  ],
-  [
-    comboKey('Fuego', 'Tierra'),
-    {
+  },
+  {
+    sources: ['Fuego', 'Tierra'],
+    result: {
       name: 'Aleación viva',
       type: 'Tecnología',
       lore: 'Metal que aún palpita con el calor de la forja.',
     },
-  ],
-  [
-    comboKey('Tierra', 'Semilla'),
-    {
+  },
+  {
+    sources: ['Tierra', 'Semilla'],
+    result: {
       name: 'Bosque miniatura',
       type: 'Naturaleza',
       lore: 'Un ecosistema diminuto cobra vida sobre la mesa.',
     },
-  ],
-  [
-    comboKey('Agua', 'Semilla'),
-    {
+  },
+  {
+    sources: ['Agua', 'Semilla'],
+    result: {
       name: 'Brote',
       type: 'Naturaleza',
       lore: 'Un tallo verde que busca la luz del taller.',
     },
-  ],
-  [
-    comboKey('Luz', 'Agua'),
-    {
+  },
+  {
+    sources: ['Luz', 'Agua'],
+    result: {
       name: 'Arcoíris de estudio',
       type: 'Fenómeno',
       lore: 'Colores suspendidos sobre el espacio de trabajo.',
     },
-  ],
-  [
-    comboKey('Luz', 'Sombra'),
-    {
+  },
+  {
+    sources: ['Luz', 'Sombra'],
+    result: {
       name: 'Crepúsculo',
       type: 'Fenómeno',
       lore: 'Un equilibrio perfecto entre claridad y misterio.',
     },
-  ],
-  [
-    comboKey('Luz', 'Tiempo'),
-    {
+  },
+  {
+    sources: ['Luz', 'Tiempo'],
+    result: {
       name: 'Aurora detenida',
       type: 'Historia',
       lore: 'Un amanecer congelado en un instante eterno.',
     },
-  ],
-  [
-    comboKey('Sombra', 'Tiempo'),
-    {
+  },
+  {
+    sources: ['Sombra', 'Tiempo'],
+    result: {
       name: 'Eco antiguo',
       type: 'Historia',
       lore: 'Susurros de épocas pasadas resuenan en la sala.',
     },
-  ],
-  [
-    comboKey('Metal', 'Fuego'),
-    {
+  },
+  {
+    sources: ['Metal', 'Fuego'],
+    result: {
       name: 'Espada forjada',
       type: 'Arte',
       lore: 'Una hoja brillante recién templada.',
     },
-  ],
-  [
-    comboKey('Metal', 'Semilla'),
-    {
+  },
+  {
+    sources: ['Metal', 'Semilla'],
+    result: {
       name: 'Jardín mecánico',
       type: 'Quimera',
       lore: 'Plantas de engranajes que florecen con precisión.',
     },
-  ],
-  [
-    comboKey('Melodía', 'Aire'),
-    {
+  },
+  {
+    sources: ['Melodía', 'Aire'],
+    result: {
       name: 'Canción viajera',
       type: 'Arte',
       lore: 'Notas que flotan y recorren el taller.',
     },
-  ],
-  [
-    comboKey('Melodía', 'Tiempo'),
-    {
+  },
+  {
+    sources: ['Melodía', 'Tiempo'],
+    result: {
       name: 'Sinfonía eterna',
       type: 'Concepto',
       lore: 'Un motivo musical que nunca se repite igual.',
     },
-  ],
+  },
+  {
+    sources: ['Agua', 'Metal'],
+    result: {
+      name: 'Óxido viviente',
+      type: 'Materia',
+      lore: 'El metal respira burbujas al ser bañado por corrientes puras.',
+    },
+  },
+  {
+    sources: ['Agua', 'Tiempo'],
+    result: {
+      name: 'Marea eterna',
+      type: 'Historia',
+      lore: 'Las olas guardan memoria de cada estación vivida.',
+    },
+  },
+  {
+    sources: ['Fuego', 'Luz'],
+    result: {
+      name: 'Aurora ígnea',
+      type: 'Fenómeno',
+      lore: 'Lenguas ardientes pintan el cielo del taller.',
+    },
+  },
+  {
+    sources: ['Fuego', 'Sombra'],
+    result: {
+      name: 'Pira crepuscular',
+      type: 'Fenómeno',
+      lore: 'Las llamas oscilan entre el resplandor y el misterio.',
+    },
+  },
+  {
+    sources: ['Tierra', 'Luz'],
+    result: {
+      name: 'Jardín luminoso',
+      type: 'Naturaleza',
+      lore: 'Raíces y destellos comparten un mismo pulso.',
+    },
+  },
+  {
+    sources: ['Tierra', 'Melodía'],
+    result: {
+      name: 'Tambor de arcilla',
+      type: 'Arte',
+      lore: 'Percusiones moldeadas con barro templado.',
+    },
+  },
+  {
+    sources: ['Aire', 'Luz'],
+    result: {
+      name: 'Brisa prisma',
+      type: 'Fenómeno',
+      lore: 'Corrientes que dispersan colores como un abanico.',
+    },
+  },
+  {
+    sources: ['Aire', 'Sombra'],
+    result: {
+      name: 'Susurro umbrío',
+      type: 'Concepto',
+      lore: 'El viento transmite secretos en penumbra.',
+    },
+  },
+  {
+    sources: ['Luz', 'Melodía'],
+    result: {
+      name: 'Ópera solar',
+      type: 'Arte',
+      lore: 'Una puesta en escena bañada por reflejos cálidos.',
+    },
+  },
+  {
+    sources: ['Sombra', 'Semilla'],
+    result: {
+      name: 'Orquídea nocturna',
+      type: 'Naturaleza',
+      lore: 'Florece al ritmo de la penumbra cómplice.',
+    },
+  },
+  {
+    sources: ['Sombra', 'Metal'],
+    result: {
+      name: 'Acero fantasma',
+      type: 'Tecnología',
+      lore: 'Una aleación que aparece y desaparece con la luz.',
+    },
+  },
+  {
+    sources: ['Semilla', 'Luz'],
+    result: {
+      name: 'Invernadero estelar',
+      type: 'Naturaleza',
+      lore: 'Brotan tallos que siguen constelaciones.',
+    },
+  },
+  {
+    sources: ['Tiempo', 'Metal'],
+    result: {
+      name: 'Reloj forjado',
+      type: 'Tecnología',
+      lore: 'Engranajes templados cuentan historias de siglos.',
+    },
+  },
+  {
+    sources: ['Metal', 'Melodía'],
+    result: {
+      name: 'Campana resonante',
+      type: 'Arte',
+      lore: 'Un instrumento forjado que canta al ser tocado.',
+    },
+  },
+  {
+    sources: ['Melodía', 'Agua'],
+    result: {
+      name: 'Coral cantor',
+      type: 'Arte',
+      lore: 'Armonías burbujean desde un arrecife improvisado.',
+    },
+  },
+  {
+    sources: ['Vapor', 'Metal'],
+    result: {
+      name: 'Turbina nebulosa',
+      type: 'Tecnología',
+      lore: 'Nubes cálidas impulsan un motor de precisión.',
+    },
+  },
+  {
+    sources: ['Niebla', 'Luz'],
+    result: {
+      name: 'Halo brumoso',
+      type: 'Fenómeno',
+      lore: 'Un resplandor suave envuelve la niebla flotante.',
+    },
+  },
+  {
+    sources: ['Barro', 'Fuego'],
+    result: {
+      name: 'Cerámica viva',
+      type: 'Arte',
+      lore: 'Arcilla ardiente que toma forma frente a tus ojos.',
+    },
+  },
+  {
+    sources: ['Chispa', 'Melodía'],
+    result: {
+      name: 'Ritmo eléctrico',
+      type: 'Arte',
+      lore: 'Un compás brillante chisporrotea sobre el aire.',
+    },
+  },
+  {
+    sources: ['Aleación viva', 'Melodía'],
+    result: {
+      name: 'Forja sinfónica',
+      type: 'Tecnología',
+      lore: 'Metal pulsante marca el ritmo de cada golpe musical.',
+    },
+  },
+  {
+    sources: ['Bosque miniatura', 'Luz'],
+    result: {
+      name: 'Bosque solar',
+      type: 'Naturaleza',
+      lore: 'Hojitas brillan como paneles diminutos.',
+    },
+  },
+  {
+    sources: ['Brote', 'Tiempo'],
+    result: {
+      name: 'Árbol crónico',
+      type: 'Historia',
+      lore: 'Los anillos del tronco marcan eras completas.',
+    },
+  },
+  {
+    sources: ['Arcoíris de estudio', 'Tierra'],
+    result: {
+      name: 'Prisma mineral',
+      type: 'Arte',
+      lore: 'Cristales terrenales refractan todos los colores.',
+    },
+  },
+  {
+    sources: ['Crepúsculo', 'Melodía'],
+    result: {
+      name: 'Balada crepuscular',
+      type: 'Arte',
+      lore: 'Canciones que aparecen al caer la tarde.',
+    },
+  },
+  {
+    sources: ['Aurora detenida', 'Agua'],
+    result: {
+      name: 'Aurora reflejada',
+      type: 'Fenómeno',
+      lore: 'La aurora se mira en espejos líquidos interminables.',
+    },
+  },
+  {
+    sources: ['Eco antiguo', 'Metal'],
+    result: {
+      name: 'Campana ancestral',
+      type: 'Historia',
+      lore: 'El bronce vibra con historias de antaño.',
+    },
+  },
+  {
+    sources: ['Espada forjada', 'Luz'],
+    result: {
+      name: 'Espada radiante',
+      type: 'Tecnología',
+      lore: 'La hoja absorbe claridad y corta las tinieblas.',
+    },
+  },
+  {
+    sources: ['Jardín mecánico', 'Agua'],
+    result: {
+      name: 'Invernadero mecánico',
+      type: 'Tecnología',
+      lore: 'Ruedas y tallos se riegan con precisión hidráulica.',
+    },
+  },
+  {
+    sources: ['Canción viajera', 'Sombra'],
+    result: {
+      name: 'Serenata de sombras',
+      type: 'Arte',
+      lore: 'Melodías que sólo se escuchan en penumbra.',
+    },
+  },
+  {
+    sources: ['Sinfonía eterna', 'Luz'],
+    result: {
+      name: 'Partitura lumínica',
+      type: 'Arte',
+      lore: 'Cada nota enciende destellos al desplegarse.',
+    },
+  },
+];
+
+const TYPE_ANCHORS = new Map([
+  ['Elemento', 'Agua'],
+  ['Energía', 'Luz'],
+  ['Naturaleza', 'Semilla'],
+  ['Materia', 'Tierra'],
+  ['Fenómeno', 'Aire'],
+  ['Tecnología', 'Metal'],
+  ['Arte', 'Melodía'],
+  ['Concepto', 'Tiempo'],
+  ['Historia', 'Tiempo'],
+  ['Ser', 'Tierra'],
+  ['Idea', 'Tiempo'],
+  ['Quimera', 'Sombra'],
 ]);
+
+function buildExactCombinationMap() {
+  const map = new Map();
+  const catalog = new Map(INITIAL_PALETTE.map(({ name, type }) => [name, type]));
+
+  const addCombination = (sources, result) => {
+    map.set(comboKey(sources[0], sources[1]), result);
+    if (!catalog.has(result.name)) {
+      catalog.set(result.name, result.type);
+    }
+  };
+
+  EXACT_COMBINATION_DATA.forEach(({ sources, result }) => addCombination(sources, result));
+
+  catalog.forEach((type, name) => {
+    const selfKey = comboKey(name, name);
+    if (!map.has(selfKey)) {
+      addCombination(
+        [name, name],
+        {
+          name,
+          type,
+          lore: `La esencia de ${name} se intensifica al reflejarse en sí misma.`,
+        }
+      );
+    }
+
+    if (BASE_NAMES.has(name)) {
+      return;
+    }
+
+    const preferredBase = TYPE_ANCHORS.get(type) || INITIAL_PALETTE[0].name;
+    const baseName = BASE_NAMES.has(preferredBase) ? preferredBase : INITIAL_PALETTE[0].name;
+    const baseKey = comboKey(name, baseName);
+
+    if (!map.has(baseKey)) {
+      addCombination(
+        [name, baseName],
+        {
+          name,
+          type,
+          lore: `${name} absorbe matices de ${baseName.toLowerCase()} y conserva su forma original.`,
+        }
+      );
+    }
+  });
+
+  return map;
+}
+
+const EXACT_COMBINATIONS = buildExactCombinationMap();
 
 const TYPE_COMBINATIONS = new Map([
   [
@@ -593,7 +902,12 @@ function ImagineCraftWorkshop() {
             descubre resultados sorprendentes.
           </p>
         </div>
-        <div className={styles.status}>{statusMessage}</div>
+        <div className={styles.headerActions}>
+          <Link href="/" className={styles.backButton}>
+            Volver a la base
+          </Link>
+          <div className={styles.status}>{statusMessage}</div>
+        </div>
       </header>
 
       <form className={styles.creator} onSubmit={handleAddElement}>
