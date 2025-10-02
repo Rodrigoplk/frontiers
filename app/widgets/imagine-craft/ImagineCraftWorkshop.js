@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import styles from './ImagineCraftWorkshop.module.css';
 
 const TYPE_OPTIONS = [
@@ -301,6 +301,7 @@ function ImagineCraftWorkshop() {
   ]);
   const [statusMessage, setStatusMessage] = useState('Listo para crear nuevas combinaciones.');
   const [draggingId, setDraggingId] = useState(null);
+  const [selectedFusion, setSelectedFusion] = useState(null);
 
   const paletteById = useMemo(() => {
     const map = new Map();
@@ -317,6 +318,16 @@ function ImagineCraftWorkshop() {
     });
     return map;
   }, [boardElements]);
+
+  useEffect(() => {
+    if (!selectedFusion) return;
+    const latest = boardById.get(selectedFusion.result.id);
+    if (!latest) {
+      setSelectedFusion(null);
+    } else if (latest !== selectedFusion.result) {
+      setSelectedFusion({ result: latest, components: latest.components });
+    }
+  }, [boardById, selectedFusion]);
 
   const registerPaletteElement = (name, type, origin = 'custom') => {
     const trimmed = name.trim();
@@ -399,15 +410,21 @@ function ImagineCraftWorkshop() {
     return { x, y };
   };
 
-  const placeOnWorkspace = (element, coords) => {
+  const createBoardElement = (element, coords, metadata = {}) => {
     const newElement = {
       id: `board-${boardCounterRef.current}`,
       name: element.name,
       type: element.type,
       x: coords.x,
       y: coords.y,
+      ...metadata,
     };
     boardCounterRef.current += 1;
+    return newElement;
+  };
+
+  const placeOnWorkspace = (element, coords, metadata) => {
+    const newElement = createBoardElement(element, coords, metadata);
     setBoardElements((prev) => [...prev, newElement]);
     return newElement;
   };
@@ -459,6 +476,7 @@ function ImagineCraftWorkshop() {
 
   const handleElementDrop = (event, targetId) => {
     event.preventDefault();
+    event.stopPropagation();
     const raw = event.dataTransfer.getData('application/json');
     if (!raw) return;
     let data;
@@ -477,11 +495,36 @@ function ImagineCraftWorkshop() {
       const paletteElement = paletteById.get(data.paletteId);
       if (!paletteElement) return;
       const result = resolveCombination(paletteElement, target);
-      placeOnWorkspace(result, {
-        x: coords.x + 24,
-        y: coords.y + 24,
+      const merged = createBoardElement(
+        result,
+        {
+          x: coords.x + 24,
+          y: coords.y + 24,
+        },
+        {
+          components: [
+            {
+              id: paletteElement.id,
+              name: paletteElement.name,
+              type: paletteElement.type,
+              origin: 'palette',
+            },
+            {
+              id: target.id,
+              name: target.name,
+              type: target.type,
+              origin: 'board',
+            },
+          ],
+        }
+      );
+      setBoardElements((prev) =>
+        prev.filter((item) => item.id !== target.id).concat(merged)
+      );
+      setSelectedFusion((prev) => {
+        if (!prev) return prev;
+        return prev.result?.id === target.id ? null : prev;
       });
-      setBoardElements((prev) => prev.filter((item) => item.id !== target.id));
       const { added } = registerPaletteElement(result.name, result.type, 'discovered');
       setStatusMessage(
         `✨ ${paletteElement.name} y ${target.name} dieron lugar a ${result.name}. ${
@@ -495,23 +538,40 @@ function ImagineCraftWorkshop() {
       const other = boardById.get(data.boardId);
       if (!other || other.id === target.id) return;
       const result = resolveCombination(other, target);
-      const merged = {
-        id: `board-${boardCounterRef.current}`,
-        name: result.name,
-        type: result.type,
-        x: (other.x + target.x) / 2,
-        y: (other.y + target.y) / 2,
-      };
-      boardCounterRef.current += 1;
+      const merged = createBoardElement(
+        result,
+        {
+          x: coords.x,
+          y: coords.y,
+        },
+        {
+          components: [
+            {
+              id: other.id,
+              name: other.name,
+              type: other.type,
+              origin: 'board',
+            },
+            {
+              id: target.id,
+              name: target.name,
+              type: target.type,
+              origin: 'board',
+            },
+          ],
+        }
+      );
       setBoardElements((prev) =>
         prev
           .filter((item) => item.id !== target.id && item.id !== other.id)
-          .concat({
-            ...merged,
-            x: coords.x,
-            y: coords.y,
-          })
+          .concat(merged)
       );
+      setSelectedFusion((prev) => {
+        if (!prev) return prev;
+        return prev.result && (prev.result.id === target.id || prev.result.id === other.id)
+          ? null
+          : prev;
+      });
       const { added } = registerPaletteElement(result.name, result.type, 'discovered');
       setStatusMessage(
         `✨ ${other.name} y ${target.name} se fusionaron en ${result.name}. ${
@@ -591,6 +651,11 @@ function ImagineCraftWorkshop() {
                 onDragEnd={handleDragEnd}
                 onDrop={(event) => handleElementDrop(event, element.id)}
                 onDragOver={handleElementDragOver}
+                onClick={() =>
+                  element.components
+                    ? setSelectedFusion({ result: element, components: element.components })
+                    : setSelectedFusion(null)
+                }
               >
                 <span className={styles.tokenName}>{element.name}</span>
                 <span className={styles.tokenType}>{element.type}</span>
@@ -600,6 +665,23 @@ function ImagineCraftWorkshop() {
         </div>
         <aside className={styles.sidePanel}>
           <h2 className={styles.panelTitle}>Bitácora de mezclas</h2>
+          {selectedFusion && (
+            <div className={styles.fusionPanel}>
+              <div className={styles.fusionHeader}>
+                <h3 className={styles.fusionTitle}>{selectedFusion.result.name}</h3>
+                <p className={styles.fusionType}>{selectedFusion.result.type}</p>
+              </div>
+              <p className={styles.fusionHint}>Combinación formada por:</p>
+              <ul className={styles.fusionList}>
+                {selectedFusion.components.map((component) => (
+                  <li key={`${selectedFusion.result.id}-${component.id}`} className={styles.fusionItem}>
+                    <span className={styles.fusionItemName}>{component.name}</span>
+                    <span className={styles.fusionItemType}>{component.type}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
           <ul className={styles.logList}>
             {log.map((entry, index) => (
               <li key={`${entry}-${index}`} className={styles.logEntry}>
