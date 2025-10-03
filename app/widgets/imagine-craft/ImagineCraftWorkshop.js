@@ -611,6 +611,10 @@ function ImagineCraftWorkshop() {
   const [statusMessage, setStatusMessage] = useState('Listo para crear nuevas combinaciones.');
   const [draggingId, setDraggingId] = useState(null);
   const [selectedFusion, setSelectedFusion] = useState(null);
+  const [isLogOpen, setIsLogOpen] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
+  const [touchDrag, setTouchDrag] = useState(null);
 
   const paletteById = useMemo(() => {
     const map = new Map();
@@ -627,6 +631,45 @@ function ImagineCraftWorkshop() {
     });
     return map;
   }, [boardElements]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+    const updateLayout = () => {
+      setIsDesktop(window.innerWidth >= 960);
+    };
+    updateLayout();
+    window.addEventListener('resize', updateLayout);
+    return () => {
+      window.removeEventListener('resize', updateLayout);
+    };
+  }, []);
+
+  useEffect(() => {
+    setIsLogOpen(isDesktop);
+  }, [isDesktop]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+    const query = window.matchMedia('(pointer: coarse)');
+    const update = () => setIsTouchDevice(query.matches);
+    update();
+    if (typeof query.addEventListener === 'function') {
+      query.addEventListener('change', update);
+      return () => {
+        query.removeEventListener('change', update);
+      };
+    }
+    query.addListener(update);
+    return () => {
+      query.removeListener(update);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isTouchDevice) {
+      setTouchDrag(null);
+    }
+  }, [isTouchDevice]);
 
   useEffect(() => {
     if (!selectedFusion) return;
@@ -738,6 +781,127 @@ function ImagineCraftWorkshop() {
     return newElement;
   };
 
+  const placeElementAtCenter = (element) => {
+    const workspace = workspaceRef.current;
+    if (!workspace) return;
+    const rect = workspace.getBoundingClientRect();
+    const coords = {
+      x: rect.width / 2,
+      y: rect.height / 2,
+    };
+    placeOnWorkspace(element, coords);
+    setStatusMessage(`Has colocado ${element.name} en el espacio creativo.`);
+    setSelectedFusion(null);
+  };
+
+  const placePaletteElementInWorkspace = (paletteElement, coords) => {
+    placeOnWorkspace(paletteElement, coords);
+    setStatusMessage(`Has colocado ${paletteElement.name} en el espacio creativo.`);
+    setSelectedFusion(null);
+  };
+
+  const moveBoardElementInWorkspace = (moving, coords) => {
+    setBoardElements((prev) =>
+      prev.map((item) =>
+        item.id === moving.id
+          ? {
+              ...item,
+              x: coords.x,
+              y: coords.y,
+            }
+          : item
+      )
+    );
+  };
+
+  const combinePaletteWithBoard = (paletteElement, target, coords) => {
+    const result = resolveCombination(paletteElement, target);
+    const merged = createBoardElement(
+      result,
+      {
+        x: coords.x + 24,
+        y: coords.y + 24,
+      },
+      {
+        components: [
+          {
+            id: paletteElement.id,
+            name: paletteElement.name,
+            type: paletteElement.type,
+            origin: 'palette',
+          },
+          {
+            id: target.id,
+            name: target.name,
+            type: target.type,
+            origin: 'board',
+          },
+        ],
+      }
+    );
+    setBoardElements((prev) =>
+      prev.filter((item) => item.id !== target.id).concat(merged)
+    );
+    setSelectedFusion((prev) => {
+      if (!prev) return prev;
+      return prev.result?.id === target.id ? null : prev;
+    });
+    const { added } = registerPaletteElement(result.name, result.type, 'discovered');
+    setStatusMessage(
+      `✨ ${paletteElement.name} y ${target.name} dieron lugar a ${result.name}. ${
+        added ? 'Se añadió a tu barra creativa.' : 'Ya formaba parte de tu biblioteca.'
+      }`
+    );
+    appendLog(
+      `${paletteElement.name} + ${target.name} → ${result.name}. ${result.lore}`
+    );
+  };
+
+  const combineBoardWithBoard = (other, target, coords) => {
+    const result = resolveCombination(other, target);
+    const merged = createBoardElement(
+      result,
+      {
+        x: coords.x,
+        y: coords.y,
+      },
+      {
+        components: [
+          {
+            id: other.id,
+            name: other.name,
+            type: other.type,
+            origin: 'board',
+          },
+          {
+            id: target.id,
+            name: target.name,
+            type: target.type,
+            origin: 'board',
+          },
+        ],
+      }
+    );
+    setBoardElements((prev) =>
+      prev
+        .filter((item) => item.id !== target.id && item.id !== other.id)
+        .concat(merged)
+    );
+    setSelectedFusion((prev) => {
+      if (!prev) return prev;
+      return prev.result && (prev.result.id === target.id || prev.result.id === other.id)
+        ? null
+        : prev;
+    });
+    const { added } = registerPaletteElement(result.name, result.type, 'discovered');
+    setStatusMessage(
+      `✨ ${other.name} y ${target.name} se fusionaron en ${result.name}. ${
+        added ? 'Nuevo cuadro desbloqueado.' : 'Lo recuperaste de tu biblioteca.'
+      }`
+    );
+    appendLog(`${other.name} + ${target.name} → ${result.name}. ${result.lore}`);
+  };
+
   const handleWorkspaceDrop = (event) => {
     event.preventDefault();
     const raw = event.dataTransfer.getData('application/json');
@@ -754,22 +918,11 @@ function ImagineCraftWorkshop() {
     if (data.source === 'palette') {
       const paletteElement = paletteById.get(data.paletteId);
       if (!paletteElement) return;
-      placeOnWorkspace(paletteElement, coords);
-      setStatusMessage(`Has colocado ${paletteElement.name} en el espacio creativo.`);
+      placePaletteElementInWorkspace(paletteElement, coords);
     } else if (data.source === 'board') {
       const moving = boardById.get(data.boardId);
       if (!moving) return;
-      setBoardElements((prev) =>
-        prev.map((item) =>
-          item.id === moving.id
-            ? {
-                ...item,
-                x: coords.x,
-                y: coords.y,
-              }
-            : item
-        )
-      );
+      moveBoardElementInWorkspace(moving, coords);
     }
   };
 
@@ -803,92 +956,160 @@ function ImagineCraftWorkshop() {
     if (data.source === 'palette') {
       const paletteElement = paletteById.get(data.paletteId);
       if (!paletteElement) return;
-      const result = resolveCombination(paletteElement, target);
-      const merged = createBoardElement(
-        result,
-        {
-          x: coords.x + 24,
-          y: coords.y + 24,
-        },
-        {
-          components: [
-            {
-              id: paletteElement.id,
-              name: paletteElement.name,
-              type: paletteElement.type,
-              origin: 'palette',
-            },
-            {
-              id: target.id,
-              name: target.name,
-              type: target.type,
-              origin: 'board',
-            },
-          ],
-        }
-      );
-      setBoardElements((prev) =>
-        prev.filter((item) => item.id !== target.id).concat(merged)
-      );
-      setSelectedFusion((prev) => {
-        if (!prev) return prev;
-        return prev.result?.id === target.id ? null : prev;
-      });
-      const { added } = registerPaletteElement(result.name, result.type, 'discovered');
-      setStatusMessage(
-        `✨ ${paletteElement.name} y ${target.name} dieron lugar a ${result.name}. ${
-          added ? 'Se añadió a tu barra creativa.' : 'Ya formaba parte de tu biblioteca.'
-        }`
-      );
-      appendLog(
-        `${paletteElement.name} + ${target.name} → ${result.name}. ${result.lore}`
-      );
+      combinePaletteWithBoard(paletteElement, target, coords);
     } else if (data.source === 'board') {
       const other = boardById.get(data.boardId);
       if (!other || other.id === target.id) return;
-      const result = resolveCombination(other, target);
-      const merged = createBoardElement(
-        result,
-        {
-          x: coords.x,
-          y: coords.y,
-        },
-        {
-          components: [
-            {
-              id: other.id,
-              name: other.name,
-              type: other.type,
-              origin: 'board',
-            },
-            {
-              id: target.id,
-              name: target.name,
-              type: target.type,
-              origin: 'board',
-            },
-          ],
-        }
-      );
-      setBoardElements((prev) =>
-        prev
-          .filter((item) => item.id !== target.id && item.id !== other.id)
-          .concat(merged)
-      );
-      setSelectedFusion((prev) => {
-        if (!prev) return prev;
-        return prev.result && (prev.result.id === target.id || prev.result.id === other.id)
-          ? null
-          : prev;
-      });
-      const { added } = registerPaletteElement(result.name, result.type, 'discovered');
-      setStatusMessage(
-        `✨ ${other.name} y ${target.name} se fusionaron en ${result.name}. ${
-          added ? 'Nuevo cuadro desbloqueado.' : 'Lo recuperaste de tu biblioteca.'
-        }`
-      );
-      appendLog(`${other.name} + ${target.name} → ${result.name}. ${result.lore}`);
+      combineBoardWithBoard(other, target, coords);
     }
+  };
+
+  const finalizeTouchDrop = (drag, clientX, clientY) => {
+    if (!drag.isActive) {
+      return;
+    }
+    const workspace = workspaceRef.current;
+    if (!workspace) return;
+    const rect = workspace.getBoundingClientRect();
+    const coords = {
+      x: Math.max(0, Math.min(clientX - rect.left, rect.width)),
+      y: Math.max(0, Math.min(clientY - rect.top, rect.height)),
+    };
+
+    const hitElement = document.elementFromPoint(clientX, clientY);
+    const targetNode = hitElement ? hitElement.closest('[data-board-id]') : null;
+    const targetId = targetNode?.getAttribute('data-board-id');
+
+    if (targetId && targetId !== drag.element.id) {
+      const target = boardById.get(targetId);
+      if (!target) return;
+      if (drag.origin === 'palette') {
+        const paletteElement = paletteById.get(drag.element.id) || drag.element;
+        if (!paletteElement) return;
+        combinePaletteWithBoard(paletteElement, target, coords);
+      } else if (drag.origin === 'board') {
+        const moving = boardById.get(drag.element.id);
+        if (!moving || moving.id === target.id) return;
+        combineBoardWithBoard(moving, target, coords);
+      }
+      return;
+    }
+
+    const insideWorkspace =
+      clientX >= rect.left &&
+      clientX <= rect.right &&
+      clientY >= rect.top &&
+      clientY <= rect.bottom;
+
+    if (!insideWorkspace) {
+      return;
+    }
+
+    if (drag.origin === 'palette') {
+      const paletteElement = paletteById.get(drag.element.id) || drag.element;
+      if (!paletteElement) return;
+      placePaletteElementInWorkspace(paletteElement, coords);
+    } else if (drag.origin === 'board') {
+      const moving = boardById.get(drag.element.id);
+      if (!moving) return;
+      moveBoardElementInWorkspace(moving, coords);
+    }
+  };
+
+  const cancelTouchDrag = () => {
+    setTouchDrag(null);
+  };
+
+  const handlePalettePointerDown = (event, element) => {
+    if (!isTouchDevice || event.pointerType === 'mouse') {
+      return;
+    }
+    event.stopPropagation();
+    event.currentTarget.setPointerCapture(event.pointerId);
+    setTouchDrag({
+      pointerId: event.pointerId,
+      origin: 'palette',
+      element,
+      position: { x: event.clientX, y: event.clientY },
+      start: { x: event.clientX, y: event.clientY },
+      isActive: false,
+    });
+  };
+
+  const handleBoardPointerDown = (event, element) => {
+    if (!isTouchDevice || event.pointerType === 'mouse') {
+      return;
+    }
+    event.stopPropagation();
+    event.currentTarget.setPointerCapture(event.pointerId);
+    setTouchDrag({
+      pointerId: event.pointerId,
+      origin: 'board',
+      element,
+      position: { x: event.clientX, y: event.clientY },
+      start: { x: event.clientX, y: event.clientY },
+      isActive: false,
+    });
+  };
+
+  const handlePointerMove = (event) => {
+    if (!isTouchDevice || event.pointerType === 'mouse') {
+      return;
+    }
+    const position = { x: event.clientX, y: event.clientY };
+    let shouldPrevent = false;
+    setTouchDrag((prev) => {
+      if (!prev || prev.pointerId !== event.pointerId) {
+        return prev;
+      }
+      const distance = Math.hypot(position.x - prev.start.x, position.y - prev.start.y);
+      const isActive = prev.isActive || distance > 16;
+      if (isActive) {
+        shouldPrevent = true;
+      }
+      return {
+        ...prev,
+        position,
+        isActive,
+      };
+    });
+    if (shouldPrevent) {
+      event.preventDefault();
+    }
+  };
+
+  const releasePointer = (event) => {
+    if (typeof event.currentTarget.hasPointerCapture === 'function' &&
+        event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+  };
+
+  const handlePointerUp = (event) => {
+    if (!isTouchDevice || event.pointerType === 'mouse') {
+      return;
+    }
+    const drag = touchDrag;
+    releasePointer(event);
+    if (drag && drag.pointerId === event.pointerId) {
+      finalizeTouchDrop(drag, event.clientX, event.clientY);
+      cancelTouchDrag();
+    }
+  };
+
+  const handlePointerCancel = (event) => {
+    if (!isTouchDevice || event.pointerType === 'mouse') {
+      return;
+    }
+    releasePointer(event);
+    cancelTouchDrag();
+  };
+
+  const handlePaletteQuickPlace = (event, element) => {
+    if (!isTouchDevice) return;
+    if (draggingId) return;
+    event.preventDefault();
+    placeElementAtCenter(element);
   };
 
   return (
@@ -940,6 +1161,18 @@ function ImagineCraftWorkshop() {
         </div>
       </form>
 
+      {!isDesktop && (
+        <button
+          type="button"
+          className={`${styles.logToggle} ${isLogOpen ? styles.logToggleActive : ''}`}
+          onClick={() => setIsLogOpen((prev) => !prev)}
+          aria-expanded={isLogOpen}
+          aria-controls="workshop-log"
+        >
+          Bitácora de mezclas
+        </button>
+      )}
+
       <div className={styles.mainArea}>
         <div className={styles.workspaceWrapper}>
           <div
@@ -960,11 +1193,16 @@ function ImagineCraftWorkshop() {
                   draggingId === element.id ? styles.tokenDragging : ''
                 }`}
                 style={{ left: `${element.x}px`, top: `${element.y}px` }}
+                data-board-id={element.id}
                 draggable
                 onDragStart={(event) => handleBoardDragStart(event, element)}
                 onDragEnd={handleDragEnd}
                 onDrop={(event) => handleElementDrop(event, element.id)}
                 onDragOver={handleElementDragOver}
+                onPointerDown={(event) => handleBoardPointerDown(event, element)}
+                onPointerMove={handlePointerMove}
+                onPointerUp={handlePointerUp}
+                onPointerCancel={handlePointerCancel}
                 onClick={() =>
                   element.components
                     ? setSelectedFusion({ result: element, components: element.components })
@@ -977,7 +1215,17 @@ function ImagineCraftWorkshop() {
             ))}
           </div>
         </div>
-        <aside className={styles.sidePanel}>
+        <aside
+          id="workshop-log"
+          aria-hidden={!isDesktop && !isLogOpen}
+          className={`${styles.sidePanel} ${
+            isDesktop
+              ? ''
+              : isLogOpen
+              ? styles.sidePanelOverlayVisible
+              : styles.sidePanelOverlayHidden
+          } ${!isDesktop ? styles.sidePanelOverlay : ''}`}
+        >
           <h2 className={styles.panelTitle}>Bitácora de mezclas</h2>
           {selectedFusion && (
             <div className={styles.fusionPanel}>
@@ -1029,6 +1277,11 @@ function ImagineCraftWorkshop() {
               draggable
               onDragStart={(event) => handlePaletteDragStart(event, element)}
               onDragEnd={handleDragEnd}
+              onClick={(event) => handlePaletteQuickPlace(event, element)}
+              onPointerDown={(event) => handlePalettePointerDown(event, element)}
+              onPointerMove={handlePointerMove}
+              onPointerUp={handlePointerUp}
+              onPointerCancel={handlePointerCancel}
             >
               <span className={styles.paletteName}>{element.name}</span>
               <span className={styles.paletteType}>{element.type}</span>
@@ -1036,6 +1289,18 @@ function ImagineCraftWorkshop() {
           ))}
         </div>
       </footer>
+      {touchDrag?.isActive && (
+        <div
+          className={styles.touchDragPreview}
+          style={{
+            left: `${touchDrag.position.x}px`,
+            top: `${touchDrag.position.y}px`,
+          }}
+        >
+          <span className={styles.touchDragName}>{touchDrag.element.name}</span>
+          <span className={styles.touchDragType}>{touchDrag.element.type}</span>
+        </div>
+      )}
     </section>
   );
 }
