@@ -4,6 +4,12 @@ export default function HomePage() {
   return (
     <main className="welcome-page">
       <div className="zipper-frame">
+        <Link className="project-link" href="/elementalist">
+          <span className="project-link__subtitle">Roadmap destacado</span>
+          <span className="project-link__title">Seguimiento Elementalist</span>
+          <span className="project-link__cta">Ver panel de progreso</span>
+        </Link>
+
         <header className="hero">
           <h1 className="hero__title">Rodrigoplk playground</h1>
         </header>
