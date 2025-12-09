@@ -283,6 +283,13 @@ export default function ElementalistPage() {
           </header>
 
           <aside className="elementalist-nugget-board" aria-label="Sesiones de progreso">
+            <div className="nugget-board__header">
+              <p className="nugget-board__eyebrow">motivación diaria</p>
+              <h2 className="nugget-board__title">Pepitas de oro</h2>
+              <p className="nugget-board__subtitle">
+                Cada pepita representa una sesión completada.
+              </p>
+            </div>
             <div className="nugget-board__grid" role="list">
               {sessionLogs.map((session) => {
                 const size = getNuggetSize(session.minutes);
@@ -298,6 +305,10 @@ export default function ElementalistPage() {
                 );
               })}
             </div>
+            <p className="nugget-board__legend">
+              Tamaños: &lt;1h pequeño · 1-3h mediano · &gt;3h grande. Hover para
+              ver tiempo exacto.
+            </p>
           </aside>
         </div>
 
