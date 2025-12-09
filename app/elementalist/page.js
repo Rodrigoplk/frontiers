@@ -140,6 +140,22 @@ const timeline = [
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
+const sessionLogs = [{ id: "session-1", minutes: 90 }];
+
+function formatDuration(minutes) {
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+
+  if (hours <= 0) return `${remainingMinutes} min`;
+  return `${hours}h ${remainingMinutes.toString().padStart(2, "0")} min`;
+}
+
+function getNuggetSize(minutes) {
+  if (minutes < 60) return "small";
+  if (minutes <= 180) return "medium";
+  return "large";
+}
+
 function getWeekStatus({ completionRatio, expectedRatio, isFuture, isPast }) {
   if (isFuture) return { label: "Programado", tone: "neutral" };
   if (isPast && completionRatio >= 0.999) {
@@ -252,18 +268,38 @@ export default function ElementalistPage() {
     <main className="elementalist-page">
       <div className="elementalist-backdrop" />
       <div className="elementalist-shell">
-        <header className="elementalist-hero">
-          <Link className="elementalist-hero__return" href="/">
-            ← Volver al playground
-          </Link>
-          <p className="elementalist-hero__eyebrow">Proyecto Elementalist</p>
-          <h1 className="elementalist-hero__title">Panel de progreso semanal</h1>
-          <p className="elementalist-hero__lead">
-            Un vistazo condensado al roadmap de 13 semanas del juego de mundo
-            abierto creado en Unreal Engine. Supervisa el avance, detecta si vas
-            a tiempo y mantén claras las prioridades de cada sprint.
-          </p>
-        </header>
+        <div className="elementalist-header-layout">
+          <header className="elementalist-hero">
+            <Link className="elementalist-hero__return" href="/">
+              ← Volver al playground
+            </Link>
+            <p className="elementalist-hero__eyebrow">Proyecto Elementalist</p>
+            <h1 className="elementalist-hero__title">Panel de progreso semanal</h1>
+            <p className="elementalist-hero__lead">
+              Un vistazo condensado al roadmap de 13 semanas del juego de mundo
+              abierto creado en Unreal Engine. Supervisa el avance, detecta si
+              vas a tiempo y mantén claras las prioridades de cada sprint.
+            </p>
+          </header>
+
+          <aside className="elementalist-nugget-board" aria-label="Sesiones de progreso">
+            <div className="nugget-board__grid" role="list">
+              {sessionLogs.map((session) => {
+                const size = getNuggetSize(session.minutes);
+                const durationLabel = formatDuration(session.minutes);
+                return (
+                  <div
+                    key={session.id}
+                    className={`nugget nugget--${size}`}
+                    title={durationLabel}
+                    role="listitem"
+                    aria-label={`Sesión de ${durationLabel}`}
+                  />
+                );
+              })}
+            </div>
+          </aside>
+        </div>
 
         <section className="elementalist-overview">
           <article className="overview-card overview-card--wide">
