@@ -581,82 +581,60 @@ a:hover {
 
 .elementalist-nugget-board {
   position: relative;
-  align-self: stretch;
-  max-width: 340px;
-  width: 100%;
+  align-self: flex-start;
+  width: min(240px, 30vw);
+  aspect-ratio: 1 / 1;
   background:
-    linear-gradient(150deg, rgba(35, 28, 18, 0.92), rgba(12, 8, 4, 0.95)),
-    radial-gradient(120% 120% at 30% 0%, rgba(255, 195, 120, 0.16), transparent 62%);
-  border-radius: 22px;
-  border: 1px solid rgba(255, 170, 105, 0.45);
+    linear-gradient(145deg, rgba(22, 16, 10, 0.96), rgba(9, 7, 4, 0.94)),
+    radial-gradient(110% 110% at 20% 0%, rgba(255, 200, 120, 0.1), transparent 60%);
+  border-radius: 18px;
+  border: 1px solid rgba(255, 170, 105, 0.4);
   box-shadow:
-    0 20px 45px rgba(0, 0, 0, 0.55),
-    inset 0 0 35px rgba(255, 160, 90, 0.15);
-  padding: clamp(1.2rem, 1.1rem + 0.6vw, 1.5rem);
+    0 18px 35px rgba(0, 0, 0, 0.55),
+    inset 0 0 22px rgba(255, 160, 90, 0.12);
+  padding: 0.6rem;
   display: grid;
-  gap: 0.85rem;
-}
-
-.nugget-board__header {
-  display: grid;
-  gap: 0.2rem;
-}
-
-.nugget-board__eyebrow {
-  margin: 0;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  font-size: 0.68rem;
-  color: rgba(255, 200, 150, 0.72);
-}
-
-.nugget-board__title {
-  margin: 0;
-  font-size: 1.2rem;
-  color: #ffe6bf;
-}
-
-.nugget-board__subtitle {
-  margin: 0;
-  color: rgba(255, 220, 180, 0.72);
-  font-size: 0.92rem;
+  place-items: center;
 }
 
 .nugget-board__grid {
-  background: rgba(255, 200, 140, 0.06);
-  border: 1px solid rgba(255, 190, 120, 0.3);
-  border-radius: 18px;
-  padding: clamp(0.9rem, 0.8rem + 0.4vw, 1.1rem);
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 200, 140, 0.05);
+  border: 1px solid rgba(255, 190, 120, 0.28);
+  border-radius: 14px;
+  padding: clamp(0.55rem, 0.4rem + 0.4vw, 0.8rem);
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: clamp(0.65rem, 0.5rem + 0.3vw, 0.85rem);
+  grid-template-columns: repeat(8, 1fr);
+  gap: clamp(0.32rem, 0.26rem + 0.1vw, 0.38rem);
   aspect-ratio: 1 / 1;
+  align-content: start;
 }
 
 .nugget {
   --nugget-scale: 1;
   width: 100%;
   aspect-ratio: 1 / 1;
-  border-radius: 12px;
+  clip-path: polygon(20% 10%, 45% 5%, 70% 12%, 88% 32%, 95% 58%, 82% 84%, 54% 94%, 30% 90%, 12% 72%, 8% 44%);
   background:
-    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.55), transparent 48%),
-    linear-gradient(135deg, #ffdf8a, #ffb13f 48%, #c76b10);
+    radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.42), transparent 50%),
+    linear-gradient(150deg, #ffd77c, #f7a93c 55%, #c36d16 92%);
   box-shadow:
-    0 10px 20px rgba(0, 0, 0, 0.35),
-    inset 0 0 14px rgba(255, 210, 150, 0.5);
+    0 6px 10px rgba(0, 0, 0, 0.28),
+    inset 0 0 10px rgba(255, 220, 170, 0.45);
   transform: scale(var(--nugget-scale));
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
 }
 
 .nugget:hover {
   box-shadow:
-    0 14px 26px rgba(0, 0, 0, 0.45),
-    inset 0 0 18px rgba(255, 240, 190, 0.6);
-  transform: scale(calc(var(--nugget-scale) + 0.05));
+    0 8px 14px rgba(0, 0, 0, 0.35),
+    inset 0 0 12px rgba(255, 235, 190, 0.6);
+  transform: scale(calc(var(--nugget-scale) + 0.08));
 }
 
 .nugget--small {
-  --nugget-scale: 0.7;
+  --nugget-scale: 0.75;
 }
 
 .nugget--medium {
@@ -664,7 +642,7 @@ a:hover {
 }
 
 .nugget--large {
-  --nugget-scale: 1.25;
+  --nugget-scale: 1.3;
 }
 
 .nugget-board__legend {
@@ -887,6 +865,7 @@ a:hover {
 .timeline-card__tasks li::marker {
   color: rgba(255, 170, 120, 0.9);
 }
+
 
 @media (max-width: 640px) {
   .elementalist-shell {
