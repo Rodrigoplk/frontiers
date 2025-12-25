@@ -140,7 +140,7 @@ const timeline = [
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
-const sessionLogs = [{ id: "session-1", minutes: 90 }];
+const sessionLogs = [{ id: "session-1", minutes: 90 },{ id: "session-2", minutes:30 }];
 
 function formatDuration(minutes) {
   const hours = Math.floor(minutes / 60);
