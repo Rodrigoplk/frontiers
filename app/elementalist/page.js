@@ -148,6 +148,7 @@ const sessionLogs = [
   { id: "session-5", minutes: 30 },
   { id: "session-6", minutes: 60 },
   { id: "session-7", minutes: 90 },
+  { id: "session-8", minutes: 30 },
 ];
 
 function formatDuration(minutes) {
