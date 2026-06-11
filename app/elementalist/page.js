@@ -13,7 +13,7 @@ const timeline = [
       "Completar secciones de curso",
       "Aplicar cielo básico en mapa",
     ],
-    completedSubtasks: 1,
+    completedSubtasks: 2,
   },
   {
     id: "week-2",
