@@ -3,413 +3,423 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
-const timeline = [
+const roadmapStart = "2026-07-08";
+const roadmapEnd = "2026-12-31";
+const dailyFocusHours = 3.25;
+
+const roadmapItems = [
   {
-    id: "week-1",
-    title: "Semana 1: Curso Sky System Secciones 2-4",
-    period: { start: "2024-10-06", end: "2024-10-12" },
-    summary: "Curso Sky System y aplicación del cielo básico al mapa.",
+    id: "sky-system",
+    phase: "Base visual",
+    title: "Curso Sky System completo",
+    period: { start: "2026-07-08", end: "2026-07-08" },
+    estimateHours: 0,
+    priority: "Cerrado",
+    type: "Aprendizaje",
+    status: "done",
+    summary: "Curso liquidado y listo para convertirlo en criterio visual del resto del proyecto.",
     tasks: [
-      "Completar secciones de curso",
-      "Aplicar cielo básico en mapa",
+      { label: "Secciones 2-7 completadas", done: true },
+      { label: "Notas aplicables a atmósfera, nubes y lighting", done: true },
+      { label: "Decidir preset base para mapas principales", done: true },
     ],
-    completedSubtasks: 2,
   },
   {
-    id: "week-2",
-    title: "Semana 2: Curso Sky System Secciones 5-7 + Preparar producción de mapas",
-    period: { start: "2024-10-13", end: "2024-10-19" },
-    summary: "Cierre del curso y primeros preparativos de producción.",
-    tasks: ["Completar curso", "Investigar uso Nanite/Lumen"],
-    completedSubtasks: 0,
-  },
-  {
-    id: "week-3",
-    title: "Semana 3: Mapa Páramos",
-    period: { start: "2024-10-20", end: "2024-10-26" },
-    summary: "Producción inicial del mapa de Páramos.",
-    tasks: ["Terminar mapa páramos", "Navegación básica", "Landmarks"],
-    completedSubtasks: 0,
-  },
-  {
-    id: "week-4",
-    title: "Semana 4: Pulir mapa Páramos",
-    period: { start: "2024-10-27", end: "2024-11-02" },
-    summary: "Iteración en iluminación, niebla y rendimiento de Páramos.",
-    tasks: ["Iluminacion variable", "Niebla", "Optimización fps"],
-    completedSubtasks: 0,
-  },
-  {
-    id: "week-5",
-    title: "Semana 5: Mapa nieve",
-    period: { start: "2024-11-03", end: "2024-11-09" },
-    summary: "Construcción del bioma nevado.",
-    tasks: ["Creación mapa nieve", "Navegación básica", "Landmarks"],
-    completedSubtasks: 0,
-  },
-  {
-    id: "week-6",
-    title: "Semana 6: Pulir mapa nieve",
-    period: { start: "2024-11-10", end: "2024-11-16" },
-    summary: "Puesta a punto de iluminación, niebla y optimización del bioma de nieve.",
-    tasks: ["Iluminacion variable", "Niebla", "Optimizacion"],
-    completedSubtasks: 0,
-  },
-  {
-    id: "week-7",
-    title: "Semana 7: Pulir movimiento",
-    period: { start: "2024-11-17", end: "2024-11-23" },
-    summary: "Refinamiento de locomoción, stamina y cámara.",
+    id: "paramos-map",
+    phase: "Mundo",
+    title: "Mapa de Páramos resuelto",
+    period: { start: "2026-07-08", end: "2026-07-08" },
+    estimateHours: 0,
+    priority: "Cerrado",
+    type: "Mapa",
+    status: "done",
+    summary: "Se marca como terminado para no arrastrar deuda falsa en el roadmap.",
     tasks: [
-      "Aceleración movimiento segun peso",
-      "Sistema stamina",
-      "Animaciones movimiento (dodge, saltos)",
-      "Camara seguimiento",
+      { label: "Layout jugable", done: true },
+      { label: "Navegación básica", done: true },
+      { label: "Landmarks principales", done: true },
     ],
-    completedSubtasks: 0,
   },
   {
-    id: "week-8",
-    title: "Semana 8: Mejorar sistema combate + Sistema de Imbuir Armas",
-    period: { start: "2024-11-24", end: "2024-11-30" },
-    summary: "Extensión del combate elemental.",
+    id: "movement-polish",
+    phase: "Gameplay core",
+    title: "Pulir movimiento y sensación del personaje",
+    period: { start: "2026-07-08", end: "2026-07-26" },
+    estimateHours: 48,
+    priority: "Crítico",
+    type: "Gameplay",
+    status: "active",
+    summary: "Primero la base jugable: input, peso, cámara, stamina y animaciones deben sentirse bien antes de producir más contenido.",
     tasks: [
-      "Mejorar ataques basicos",
-      "Introducir nuevos ataques",
-      "Imbuir elementos a armas",
+      { label: "Curvas de aceleración por peso/equipo", done: false },
+      { label: "Stamina, agotamiento y recuperación legibles", done: false },
+      { label: "Dodge, salto y aterrizaje con ventanas consistentes", done: false },
+      { label: "Cámara con seguimiento, colisión y suavizado", done: false },
+      { label: "Checklist de feel en mando y teclado", done: false },
     ],
-    completedSubtasks: 0,
   },
   {
-    id: "week-9",
-    title: "Semana 9: Últimos VFX y estados perjuicios/beneficios",
-    period: { start: "2024-12-01", end: "2024-12-07" },
-    summary: "Últimos efectos visuales y sonoros del combate.",
+    id: "combat-imbue",
+    phase: "Combate",
+    title: "Combate mejorado + imbuir armas",
+    period: { start: "2026-07-27", end: "2026-08-23" },
+    estimateHours: 72,
+    priority: "Crítico",
+    type: "Sistema",
+    status: "planned",
+    summary: "Crear un loop de combate expresivo que justifique los elementos y conecte con progresión.",
     tasks: [
-      "VFX Tornado",
-      "VFX elementos básicos",
-      "Estados quemado, mojado y ralentizado",
-      "SFX basicos de impacto",
+      { label: "Ataques básicos con cancelaciones controladas", done: false },
+      { label: "Nuevos ataques por estilo/arma", done: false },
+      { label: "Imbuir fuego, agua, viento y tierra", done: false },
+      { label: "Feedback de impacto: hitstop, cámara, SFX y VFX", done: false },
+      { label: "Tabla de daño y coste elemental", done: false },
     ],
-    completedSubtasks: 0,
   },
   {
-    id: "week-10",
-    title: "Semana 10: Comportamiento enemigos mejorado y sistema quest",
-    period: { start: "2024-12-08", end: "2024-12-14" },
-    summary: "IA y progresión.",
-    tasks: ["Bahavior tree", "Habilidad enemigo", "Sistema quest con UI", "Savegame"],
-    completedSubtasks: 0,
-  },
-  {
-    id: "week-11",
-    title: "Semana 11: Misiones + OST",
-    period: { start: "2024-12-15", end: "2024-12-21" },
-    summary: "Diseño de misiones y ambientación musical.",
-    tasks: ["Misiones tutorial", "Boss battle", "OST exploración"],
-    completedSubtasks: 0,
-  },
-  {
-    id: "week-12",
-    title: "Semana 12: Pulido misiones + SFX",
-    period: { start: "2024-12-22", end: "2024-12-28" },
-    summary: "Afinación de misiones, jefes y sonido.",
+    id: "vfx-status",
+    phase: "Combate",
+    title: "VFX finales y estados alterados",
+    period: { start: "2026-08-24", end: "2026-09-13" },
+    estimateHours: 54,
+    priority: "Alta",
+    type: "VFX/SFX",
+    status: "planned",
+    summary: "Hacer que cada estado sea reconocible incluso en combate caótico.",
     tasks: [
-      "Ultimas misiones",
-      "Ajustes finales boss",
-      "OST boss",
-      "Ultimos SFX",
-      "Pruebas rendimiento",
+      { label: "VFX Tornado listo para gameplay", done: false },
+      { label: "VFX elementos básicos normalizados", done: false },
+      { label: "Quemado, mojado, ralentizado y vulnerable", done: false },
+      { label: "SFX de impacto por elemento", done: false },
     ],
-    completedSubtasks: 0,
   },
   {
-    id: "week-13",
-    title: "Semana 13: Build y packaging",
-    period: { start: "2024-12-29", end: "2025-01-04" },
-    summary: "Cierre del proyecto, build y documentación.",
+    id: "enemy-quests",
+    phase: "Progresión",
+    title: "IA enemiga + sistema de quests",
+    period: { start: "2026-09-14", end: "2026-10-18" },
+    estimateHours: 92,
+    priority: "Crítico",
+    type: "Sistema",
+    status: "planned",
+    summary: "Un bloque grande: behavior trees, habilidades, objetivos, UI y guardado deben cerrar juntos.",
     tasks: [
-      "Hacer build",
-      "Código freeze",
-      "Readme con controles y guia",
-      "Pruebas en PCs distintos",
+      { label: "Behavior tree con patrulla, persecución y retirada", done: false },
+      { label: "Habilidad enemiga prototipo + cooldown", done: false },
+      { label: "Quest log con estados y recompensas", done: false },
+      { label: "UI de seguimiento en HUD", done: false },
+      { label: "Savegame de progreso, inventario y quests", done: false },
     ],
-    completedSubtasks: 0,
+  },
+  {
+    id: "missions-ost",
+    phase: "Contenido",
+    title: "Misiones jugables + OST",
+    period: { start: "2026-10-19", end: "2026-11-15" },
+    estimateHours: 74,
+    priority: "Alta",
+    type: "Contenido",
+    status: "planned",
+    summary: "Convertir sistemas en experiencia: tutorial, misión principal, boss y música de exploración.",
+    tasks: [
+      { label: "Misiones tutorial sin texto excesivo", done: false },
+      { label: "Cadena de objetivos principal", done: false },
+      { label: "Boss battle con fases", done: false },
+      { label: "OST exploración en loop limpio", done: false },
+    ],
+  },
+  {
+    id: "qa-polish",
+    phase: "Cierre",
+    title: "Pulido final, rendimiento y SFX",
+    period: { start: "2026-11-16", end: "2026-12-13" },
+    estimateHours: 70,
+    priority: "Crítico",
+    type: "QA",
+    status: "planned",
+    summary: "Reservar casi un mes para estabilizar: bugs, balance, rendimiento, sonido y claridad visual.",
+    tasks: [
+      { label: "Bug bash semanal con lista priorizada", done: false },
+      { label: "Ajustes finales del boss", done: false },
+      { label: "OST boss + últimos SFX", done: false },
+      { label: "Pruebas de rendimiento por mapa", done: false },
+      { label: "Pases de UX: controles, prompts y legibilidad", done: false },
+    ],
+  },
+  {
+    id: "build-packaging",
+    phase: "Entrega",
+    title: "Build, packaging y documentación",
+    period: { start: "2026-12-14", end: "2026-12-31" },
+    estimateHours: 44,
+    priority: "Crítico",
+    type: "Release",
+    status: "planned",
+    summary: "Congelar alcance, generar builds repetibles y dejar una guía clara para probar el proyecto.",
+    tasks: [
+      { label: "Código freeze y rama candidata", done: false },
+      { label: "Build empaquetada", done: false },
+      { label: "README con controles y guía", done: false },
+      { label: "Pruebas en PCs distintos", done: false },
+    ],
+  },
+  {
+    id: "snow-map",
+    phase: "Aplazado",
+    title: "Mapa de nieve",
+    period: { start: "2027-01-12", end: "2027-02-08" },
+    estimateHours: 76,
+    priority: "Backlog",
+    type: "Mapa",
+    status: "deferred",
+    summary: "Aplazado conscientemente para proteger el core loop y no abrir otro bioma antes del cierre.",
+    tasks: [
+      { label: "Blockout del bioma nevado", done: false },
+      { label: "Navegación y landmarks", done: false },
+      { label: "Iluminación, niebla y optimización", done: false },
+    ],
+  },
+  {
+    id: "map-polish-pass",
+    phase: "Aplazado",
+    title: "Pulido extra de mapas",
+    period: { start: "2027-02-09", end: "2027-03-01" },
+    estimateHours: 52,
+    priority: "Backlog",
+    type: "Mapa",
+    status: "deferred",
+    summary: "Pase cosmético posterior: solo entrará si el juego ya está completo y estable.",
+    tasks: [
+      { label: "Decoración secundaria", done: false },
+      { label: "Variantes de iluminación por zona", done: false },
+      { label: "Optimización fina no bloqueante", done: false },
+    ],
   },
 ];
+
+const sessionLogs = Array.from({ length: 10 }, (_, index) => ({
+  id: `gold-nugget-${index + 1}`,
+  minutes: 90,
+  label: `Pepita ${index + 1}`,
+}));
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
-const sessionLogs = [
-  { id: "session-1", minutes: 90 },
-  { id: "session-2", minutes: 30 },
-  { id: "session-3", minutes: 60 },
-  { id: "session-4", minutes: 90 },
-  { id: "session-5", minutes: 30 },
-  { id: "session-6", minutes: 60 },
-  { id: "session-7", minutes: 90 },
-  { id: "session-8", minutes: 30 },
-  { id: "session-9", minutes: 120 },
-  { id: "session-10", minutes: 60 },
-  { id: "session-11", minutes: 120 },
-];
+function parseDate(date) {
+  return new Date(`${date}T12:00:00Z`);
+}
 
 function formatDuration(minutes) {
   const hours = Math.floor(minutes / 60);
   const remainingMinutes = minutes % 60;
 
   if (hours <= 0) return `${remainingMinutes} min`;
+  if (remainingMinutes === 0) return `${hours}h`;
   return `${hours}h ${remainingMinutes.toString().padStart(2, "0")} min`;
-}
-
-function getNuggetSize(minutes) {
-  if (minutes < 60) return "small";
-  if (minutes <= 180) return "medium";
-  return "large";
-}
-
-function getWeekStatus({ completionRatio, expectedRatio, isFuture, isPast }) {
-  if (isFuture) return { label: "Programado", tone: "neutral" };
-  if (isPast && completionRatio >= 0.999) {
-    return { label: "Completado", tone: "success" };
-  }
-  if (isPast && completionRatio < 0.999) {
-    return { label: "Pendiente", tone: "alert" };
-  }
-
-  const delta = completionRatio - expectedRatio;
-  if (delta >= 0.15) return { label: "Adelantado", tone: "success" };
-  if (delta <= -0.15) return { label: "Atrasado", tone: "alert" };
-  return { label: "En curso", tone: "info" };
 }
 
 function formatDateRange({ start, end }) {
   const formatter = new Intl.DateTimeFormat("es-ES", {
     day: "2-digit",
     month: "short",
+    year: "numeric",
   });
   return `${formatter.format(start)} – ${formatter.format(end)}`;
 }
 
-function ProgressBar({ value }) {
+function getItemStatus(item, today) {
+  if (item.status === "done") return { label: "Resuelto", tone: "success" };
+  if (item.status === "deferred") return { label: "Aplazado", tone: "deferred" };
+
+  const start = parseDate(item.period.start);
+  const end = parseDate(item.period.end);
+  if (today < start) return { label: "Programado", tone: "neutral" };
+  if (today > end) return { label: "Revisar", tone: "alert" };
+  return { label: "En foco", tone: "info" };
+}
+
+function ProgressBar({ value, variant = "default" }) {
   return (
-    <div className="progress-track">
-      <div className="progress-fill" style={{ width: `${value * 100}%` }} />
+    <div className={`progress-track progress-track--${variant}`}>
+      <div className="progress-fill" style={{ width: `${clamp(value, 0, 1) * 100}%` }} />
     </div>
   );
 }
 
 export default function ElementalistPage() {
-  const today = new Date();
-  const [expandedWeeks, setExpandedWeeks] = useState(() =>
-    new Set(timeline.slice(0, 2).map((week) => week.id))
+  const today = parseDate(new Date().toISOString().slice(0, 10));
+  const [expandedItems, setExpandedItems] = useState(() =>
+    new Set(["movement-polish", "combat-imbue", "snow-map"])
   );
 
-  const summary = useMemo(() => {
-    return timeline.reduce(
-      (acc, week) => {
-        const totalTasks = week.tasks.length;
-        const completed = Math.min(week.completedSubtasks, totalTasks);
-        acc.completed += completed;
-        acc.total += totalTasks;
-        return acc;
-      },
-      { completed: 0, total: 0 }
-    );
-  }, []);
-
-  const timelineWithStatus = useMemo(() => {
-    return timeline.map((week) => {
-      const totalTasks = week.tasks.length;
-      const completed = Math.min(week.completedSubtasks, totalTasks);
-      const start = new Date(week.period.start);
-      const end = new Date(week.period.end);
-      const isFuture = today < start;
-      const isPast = today > end;
-      const completionRatio = totalTasks ? completed / totalTasks : 0;
-      let expectedRatio = 0;
-
-      if (isFuture) {
-        expectedRatio = 0;
-      } else if (isPast) {
-        expectedRatio = 1;
-      } else {
-        const elapsed = today.getTime() - start.getTime();
-        const duration = end.getTime() - start.getTime();
-        expectedRatio = duration > 0 ? clamp(elapsed / duration, 0, 1) : 0;
-      }
+  const enrichedItems = useMemo(() => {
+    return roadmapItems.map((item) => {
+      const completedTasks = item.tasks.filter((task) => task.done).length;
+      const totalTasks = item.tasks.length;
+      const completionRatio = totalTasks ? completedTasks / totalTasks : item.status === "done" ? 1 : 0;
+      const start = parseDate(item.period.start);
+      const end = parseDate(item.period.end);
+      const duration = end.getTime() - start.getTime();
+      const elapsed = today.getTime() - start.getTime();
+      const calendarRatio = item.status === "done" ? 1 : duration > 0 ? clamp(elapsed / duration, 0, 1) : 0;
 
       return {
-        ...week,
+        ...item,
+        completedTasks,
         totalTasks,
-        completed,
         completionRatio,
-        expectedRatio,
-        status: getWeekStatus({
-          completionRatio,
-          expectedRatio,
-          isFuture,
-          isPast,
-        }),
+        calendarRatio,
+        statusInfo: getItemStatus(item, today),
         periodLabel: formatDateRange({ start, end }),
-        isFuture,
-        isCurrent: !isFuture && !isPast,
       };
     });
   }, [today]);
 
-  const toggleWeek = (weekId) => {
-    setExpandedWeeks((prev) => {
+  const activeItems = enrichedItems.filter((item) => item.status !== "deferred");
+  const deferredItems = enrichedItems.filter((item) => item.status === "deferred");
+  const totalEstimatedHours = activeItems.reduce((sum, item) => sum + item.estimateHours, 0);
+  const doneEstimatedHours = activeItems.reduce(
+    (sum, item) => sum + item.estimateHours * item.completionRatio,
+    0
+  );
+  const totalTasks = activeItems.reduce((sum, item) => sum + item.totalTasks, 0);
+  const doneTasks = activeItems.reduce((sum, item) => sum + item.completedTasks, 0);
+  const nuggetMinutes = sessionLogs.reduce((sum, session) => sum + session.minutes, 0);
+  const projectStart = parseDate(roadmapStart);
+  const projectEnd = parseDate(roadmapEnd);
+  const daysLeft = Math.max(0, Math.ceil((projectEnd.getTime() - today.getTime()) / 86400000));
+  const calendarProgress = clamp((today.getTime() - projectStart.getTime()) / (projectEnd.getTime() - projectStart.getTime()), 0, 1);
+  const remainingHours = Math.max(0, Math.round(totalEstimatedHours - doneEstimatedHours));
+  const weeklyPace = daysLeft ? ((remainingHours / daysLeft) * 7).toFixed(1) : "0.0";
+  const focusCapacity = Math.round((daysLeft * dailyFocusHours) / 5) * 5;
+  const currentItem = activeItems.find((item) => item.statusInfo.tone === "info") ?? activeItems.find((item) => item.status === "planned");
+
+  const toggleItem = (itemId) => {
+    setExpandedItems((prev) => {
       const next = new Set(prev);
-      if (next.has(weekId)) {
-        next.delete(weekId);
-      } else {
-        next.add(weekId);
-      }
+      if (next.has(itemId)) next.delete(itemId);
+      else next.add(itemId);
       return next;
     });
   };
-
-  const overallProgress = summary.total
-    ? summary.completed / summary.total
-    : 0;
-
-  const currentWeek = timelineWithStatus.find((week) => week.isCurrent);
 
   return (
     <main className="elementalist-page">
       <div className="elementalist-backdrop" />
       <div className="elementalist-shell">
         <div className="elementalist-header-layout">
-          <header className="elementalist-hero">
+          <header className="elementalist-hero glass-panel">
             <Link className="elementalist-hero__return" href="/">
               ← Volver al playground
             </Link>
-            <p className="elementalist-hero__eyebrow">Proyecto Elementalist</p>
+            <p className="elementalist-hero__eyebrow">Proyecto Elementalist · Roadmap vivo</p>
             <h1 className="elementalist-hero__title">Panel de progreso semanal</h1>
             <p className="elementalist-hero__lead">
-              Un vistazo condensado al roadmap de 13 semanas del juego de mundo
-              abierto creado en Unreal Engine. Supervisa el avance, detecta si
-              vas a tiempo y mantén claras las prioridades de cada sprint.
+              Rediseñado a ancho completo: ahora separa progreso real, presión de calendario, horas estimadas, sesiones registradas y trabajos aplazados para cerrar el proyecto antes del 31 de diciembre de 2026.
             </p>
           </header>
 
-          <aside className="elementalist-nugget-board" aria-label="Sesiones de progreso">
+          <aside className="elementalist-nugget-board glass-panel" aria-label="Pepitas de oro de progreso">
+            <div className="nugget-board__header">
+              <span>10 pepitas de oro</span>
+              <strong>{formatDuration(nuggetMinutes)} registradas</strong>
+            </div>
             <div className="nugget-board__grid" role="list">
-              {sessionLogs.map((session) => {
-                const size = getNuggetSize(session.minutes);
-                const durationLabel = formatDuration(session.minutes);
-                return (
-                  <div
-                    key={session.id}
-                    className={`nugget nugget--${size}`}
-                    title={durationLabel}
-                    role="listitem"
-                    aria-label={`Sesión de ${durationLabel}`}
-                  />
-                );
-              })}
+              {sessionLogs.map((session) => (
+                <div
+                  key={session.id}
+                  className="nugget nugget--medium"
+                  title={`${session.label}: ${formatDuration(session.minutes)}`}
+                  role="listitem"
+                  aria-label={`${session.label} de ${formatDuration(session.minutes)}`}
+                />
+              ))}
             </div>
           </aside>
         </div>
 
-        <section className="elementalist-overview">
-          <article className="overview-card overview-card--wide">
+        <section className="elementalist-command-grid" aria-label="Indicadores principales">
+          <article className="overview-card overview-card--hero glass-panel">
             <h2>Progreso general</h2>
-            <ProgressBar value={overallProgress} />
-            <div className="overview-card__stats">
-              <div>
-                <span className="overview-card__metric">
-                  {Math.round(overallProgress * 100)}%
-                </span>
-                <span className="overview-card__label">Roadmap completado</span>
-              </div>
-              <div>
-                <span className="overview-card__metric">
-                  {summary.completed}/{summary.total}
-                </span>
-                <span className="overview-card__label">Subtareas realizadas</span>
-              </div>
+            <span className="overview-card__metric">{Math.round((doneEstimatedHours / totalEstimatedHours) * 100)}%</span>
+            <ProgressBar value={doneEstimatedHours / totalEstimatedHours} variant="glow" />
+            <p className="overview-card__hint">{Math.round(doneEstimatedHours)}/{totalEstimatedHours} h estimadas completadas · {doneTasks}/{totalTasks} subtareas cerradas</p>
+          </article>
+          <article className="overview-card glass-panel">
+            <h2>Calendario</h2>
+            <span className="overview-card__metric">{daysLeft}</span>
+            <span className="overview-card__label">días hasta el 31 dic 2026</span>
+            <ProgressBar value={calendarProgress} />
+          </article>
+          <article className="overview-card glass-panel">
+            <h2>Ritmo necesario</h2>
+            <span className="overview-card__metric">{weeklyPace}h</span>
+            <span className="overview-card__label">por semana aprox.</span>
+            <p className="overview-card__hint">Capacidad opinada: ~{focusCapacity} h útiles si sostienes {dailyFocusHours} h/día laborable.</p>
+          </article>
+          <article className="overview-card glass-panel">
+            <h2>Foco actual</h2>
+            <p className="overview-card__title">{currentItem?.title}</p>
+            <span className="status-chip status-chip--info">Siguiente decisión</span>
+            <p className="overview-card__hint">No abrir mapa de nieve ni pulidos extra hasta estabilizar movimiento, combate y quests.</p>
+          </article>
+        </section>
+
+        <section className="elementalist-lanes">
+          <article className="glass-panel lane-card">
+            <h2>Trackeos añadidos</h2>
+            <div className="tracking-grid">
+              <div><strong>{activeItems.length}</strong><span>bloques activos</span></div>
+              <div><strong>{deferredItems.length}</strong><span>trabajos aplazados</span></div>
+              <div><strong>{remainingHours}h</strong><span>trabajo pendiente</span></div>
+              <div><strong>{sessionLogs.length}</strong><span>sesiones de 1h30</span></div>
             </div>
           </article>
-
-          {currentWeek ? (
-            <article className="overview-card">
-              <h2>Semana en curso</h2>
-              <p className="overview-card__period">{currentWeek.periodLabel}</p>
-              <p className="overview-card__title">{currentWeek.title}</p>
-              <ProgressBar value={currentWeek.completionRatio} />
-              <div className="overview-card__status">
-                <span className={`status-chip status-chip--${currentWeek.status.tone}`}>
-                  {currentWeek.status.label}
-                </span>
-                <span className="overview-card__hint">
-                  {Math.round(currentWeek.completionRatio * 100)}% completado ·
-                  Esperado {Math.round(currentWeek.expectedRatio * 100)}%
-                </span>
-              </div>
-            </article>
-          ) : (
-            <article className="overview-card">
-              <h2>Semana en curso</h2>
-              <p className="overview-card__placeholder">
-                Aún no comienza el roadmap o ya finalizó.
-              </p>
-            </article>
-          )}
+          <article className="glass-panel lane-card lane-card--advice">
+            <h2>Criterio de planificación</h2>
+            <p>
+              He comprimido el alcance hacia sistemas que desbloquean diversión y he movido contenido caro pero no esencial al backlog. El riesgo real está en IA/quests/savegame, por eso tiene más colchón que VFX o packaging.
+            </p>
+          </article>
         </section>
 
         <section className="elementalist-timeline">
           <header className="timeline-header">
-            <h2>Detalle semanal</h2>
-            <p>
-              Toca cada semana para desplegar sus subtareas. La barra lateral
-              refleja cuánto has avanzado y el indicador compara tu progreso con
-              lo esperado en el calendario.
-            </p>
+            <h2>Roadmap hasta cierre</h2>
+            <p>Abre cada bloque para ver tareas, estimación y presión de calendario. Los elementos aplazados quedan visibles, pero fuera del progreso principal.</p>
           </header>
 
-          <div className="timeline-grid">
-            {timelineWithStatus.map((week) => {
-              const isExpanded = expandedWeeks.has(week.id);
+          <div className="timeline-grid timeline-grid--cards">
+            {enrichedItems.map((item) => {
+              const isExpanded = expandedItems.has(item.id);
               return (
-                <article
-                  key={week.id}
-                  className={`timeline-card${week.isCurrent ? " timeline-card--current" : ""}`}
-                >
-                  <button
-                    type="button"
-                    className="timeline-card__toggle"
-                    onClick={() => toggleWeek(week.id)}
-                  >
+                <article key={item.id} className={`timeline-card timeline-card--${item.statusInfo.tone}`}>
+                  <button type="button" className="timeline-card__toggle" onClick={() => toggleItem(item.id)}>
                     <div className="timeline-card__header">
                       <div className="timeline-card__headline">
-                        <span className="timeline-card__week">{week.title}</span>
-                        <span className="timeline-card__period">{week.periodLabel}</span>
+                        <span className="timeline-card__phase">{item.phase} · {item.type}</span>
+                        <span className="timeline-card__week">{item.title}</span>
+                        <span className="timeline-card__period">{item.periodLabel}</span>
                       </div>
-                      <span
-                        className={`status-chip status-chip--${week.status.tone}`}
-                      >
-                        {week.status.label}
-                      </span>
+                      <span className={`status-chip status-chip--${item.statusInfo.tone}`}>{item.statusInfo.label}</span>
                     </div>
                     <div className="timeline-card__progress">
-                      <ProgressBar value={week.completionRatio} />
-                      <span>
-                        {week.completed}/{week.totalTasks} subtareas
-                      </span>
+                      <ProgressBar value={item.completionRatio} />
+                      <span>{item.completedTasks}/{item.totalTasks} tareas · {item.estimateHours}h · prioridad {item.priority}</span>
                     </div>
-                    <span className="timeline-card__chevron" aria-hidden>
-                      {isExpanded ? "−" : "+"}
-                    </span>
+                    <span className="timeline-card__chevron" aria-hidden>{isExpanded ? "−" : "+"}</span>
                   </button>
 
                   {isExpanded && (
                     <div className="timeline-card__body">
-                      <p className="timeline-card__summary">{week.summary}</p>
+                      <p className="timeline-card__summary">{item.summary}</p>
+                      <div className="timeline-card__meta">
+                        <span>Avance tareas: {Math.round(item.completionRatio * 100)}%</span>
+                        <span>Calendario interno: {Math.round(item.calendarRatio * 100)}%</span>
+                      </div>
                       <ul className="timeline-card__tasks">
-                        {week.tasks.map((task) => (
-                          <li key={task}>{task}</li>
+                        {item.tasks.map((task) => (
+                          <li key={task.label} className={task.done ? "task-done" : ""}>{task.done ? "✓" : "○"} {task.label}</li>
                         ))}
                       </ul>
                     </div>
